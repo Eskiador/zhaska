@@ -21,7 +21,8 @@ for (const e of ESCENAS)
     const key = `${e.id}.${b.id}`
     const aiff = path.join(dir, `${key}.aiff`)
     const wav = path.join(dir, `${key}.wav`)
-    execFileSync('say', ['-v', VOICE, '-r', RATE, '-o', aiff, b.texto])
+    // «ZHASKA» se pronuncia «Zaska» (la voz lo deletrearía); los subtítulos mantienen el nombre escrito
+    execFileSync('say', ['-v', VOICE, '-r', RATE, '-o', aiff, b.texto.replace(/ZHASKA/g, 'Zaska')])
     // 48 kHz estéreo, un poco de margen al final
     execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', aiff, '-af', 'apad=pad_dur=0.25', '-ar', '48000', '-ac', '2', wav])
     const dur = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', wav], { encoding: 'utf8' }).trim())
