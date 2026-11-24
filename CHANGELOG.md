@@ -4,6 +4,19 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Añadido — Fase 12: asistente de oficina (24-11-2026)
+- **Selector Chat / Código** arriba de la barra lateral, como en la app de Claude (atajo Ctrl+Mayús+M; recuerda el último modo). En Chat, la barra lateral muestra las conversaciones del asistente y las bases de conocimiento; en Código, los proyectos.
+- **Asistente de oficina** (modo Chat): un chat aparte del de programación para preguntar a tus documentos, resumir, redactar correos, traducir y pasar datos a tablas, con plantillas para cada tarea.
+- **Bases de conocimiento**: eliges carpetas (solo lectura) y ZHASKA indexa en tu equipo sus PDF (también escaneados), Word, Excel, CSV, texto e imágenes. Se ponen al día solas cuando cambian; los documentos con problemas aparecen con el motivo.
+- **Respuestas con fuentes**: cada dato lleva su cita ([1], [2]…) con documento y página, desplegable y con «Abrir». Si no está en tus documentos, dice «No aparece en tus documentos»; si cita una fuente que no existe o da cifras sin citar, la app avisa.
+- **Conversaciones privadas** (solo en memoria) y **bases confidenciales** (solo en conversaciones privadas).
+- Búsqueda local combinada por palabras (FTS5) y por significado (EmbeddingGemma en Ollama, ≈ 620 MB, se descarga desde la base de conocimiento).
+- El modo Chat usa Gemma 4 E4B por defecto si está instalado (medido: 12/12 aciertos y citas, igual que el 12B, en 20 s frente a 49 s).
+- `docs/PROPUESTA-IT.md`: propuesta para presentar a IT. Evaluación `tests/eval/assistant.eval.ts` y 11 pruebas nuevas; la prueba completa de la app pasa a 64 comprobaciones.
+
+### Corregido
+- Los modelos que solo sirven para búsqueda (embeddings) ya no aparecen en el selector de modelos del chat.
+
 ### Mejorado — Modelos en tarjetas de 8 GB (24-11-2026, medido en el PC con Windows)
 - La barra lateral avisa cuando el modelo cargado no cabe entero en la tarjeta gráfica y parte va al procesador (más lento), y explica por qué y qué alternativa hay.
 - Estimación de memoria corregida con las medidas reales (el 12B necesita ≈ 10 GB, no 8) y textos de los modelos con datos medidos: el 12B va a ~14 tok/s en una RTX 5060 pero es el que resuelve las tareas largas (3/3 frente a 0/3 del E4B, que va a 148 tok/s). Con menos de un 60 % en GPU ya no se recomienda el 12B.

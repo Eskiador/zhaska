@@ -26,6 +26,12 @@ export function useShortcuts() {
       if (k === 'n' && e.shiftKey) return run(() => ui.openDialog('newProject'))
       if (k === 'o' && !e.shiftKey && hasBackend) return run(() => void pickAndOpenFolder())
       if (k === 'b') return run(() => layout.toggle('sidebar'))
+      // Chat ⇄ Código (como en la app de Claude)
+      if (k === 'm' && e.shiftKey) return run(() => ui.setView(ui.view === 'assistant' ? 'code' : 'assistant'))
+      if (ui.view === 'assistant') {
+        if (k === 'n') return run(() => void import('@renderer/stores/assistant').then(({ useAssistant }) => useAssistant.getState().newConversation()))
+        return
+      }
       if (!project) return
       if (k === 'n') return run(() => void useChat.getState().newConversation(project.id))
       if (k === 's' && ws.activeTab) return run(() => void ws.save(ws.activeTab!))

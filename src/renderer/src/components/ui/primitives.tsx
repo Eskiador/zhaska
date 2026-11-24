@@ -83,13 +83,16 @@ export function Segmented<T extends string>({
   value,
   options,
   onChange,
+  full,
 }: {
   value: T
   options: { value: T; label: string; icon?: ReactNode; disabled?: boolean }[]
   onChange: (v: T) => void
+  /** Ocupa todo el ancho, con las opciones repartidas a partes iguales */
+  full?: boolean
 }) {
   return (
-    <div className="inline-flex rounded-md border border-line bg-bg-0 p-0.5">
+    <div className={cn('rounded-md border border-line bg-bg-0 p-0.5', full ? 'flex' : 'inline-flex')}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -98,6 +101,7 @@ export function Segmented<T extends string>({
           onClick={() => onChange(o.value)}
           className={cn(
             'flex h-6 items-center gap-1.5 rounded-sm px-2.5 text-small transition-colors [&_svg]:size-3.5',
+            full && 'h-7 flex-1 justify-center',
             value === o.value ? 'bg-bg-3 text-fg-1 shadow-[0_0_0_1px_var(--color-line-strong)]' : 'text-fg-2 hover:text-fg-1',
             o.disabled && 'opacity-40',
           )}

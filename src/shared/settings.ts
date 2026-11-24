@@ -51,6 +51,10 @@ export const SETTINGS_SCHEMA = {
   checkUpdates: z.boolean(),
   checkpointRetentionDays: z.number().int().min(1).max(3650),
   backupsKeep: z.number().int().min(1).max(100),
+  /** Modelo de embeddings local de las bases de conocimiento del asistente (Fase 12) */
+  embedModel: z.string().min(1).max(200),
+  /** Modelo del asistente de empresa ('' = el activo) */
+  assistantModel: z.string().max(200),
 } as const
 
 export type SettingKey = keyof typeof SETTINGS_SCHEMA

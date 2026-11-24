@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -123,6 +123,20 @@ export class AttachmentService {
         /* el adjunto se eliminó mientras se procesaba */
       }
     }
+  }
+
+  /**
+   * Texto de un documento de una base de conocimiento (Fase 12): mismo proceso aislado y mismos lectores que
+   * los adjuntos, pero sin guardar nada en el almacén de adjuntos. `dir` es una carpeta temporal.
+   */
+  async extractText(file: string, ext: string, dir: string): Promise<{ text: string; pages: number | null }> {
+    const kind = kindOfExt(ext)
+    if (kind === 'archive') throw new Error('Los ZIP no se indexan: descomprímelos en la carpeta.')
+    if (kind === 'pdf' || kind === 'image') await this.ensureOcrData()
+    const job: ExtractJob = { file, ext, dir, ocrDataDir: this.deps.ocrDir, ocrCacheDir: path.join(this.deps.ocrDir, 'cache'), pdfFontsDir: this.deps.assets.pdfFontsDir }
+    const result = await this.runJob(`kb-${randomUUID()}`, job, () => {})
+    const text = await readFile(path.join(dir, 'extracted.txt'), 'utf8')
+    return { text, pages: result.meta.pages ?? null }
   }
 
   private async runJob(id: string, job: ExtractJob, onProgress: (m: string) => void, retry = true): Promise<Awaited<ReturnType<typeof import('../attachments/extract').extract>>> {

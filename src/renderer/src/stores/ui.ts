@@ -32,7 +32,12 @@ export interface Toast {
   tone: 'info' | 'success' | 'error' | 'locked'
 }
 
+/** Vista principal: programación (proyectos y agente) o asistente de oficina (Fase 12). */
+export type MainView = 'code' | 'assistant'
+
 interface UIState {
+  view: MainView
+  setView: (v: MainView) => void
   dialog: DialogId
   settingsSection: SettingsSection
   onboarding: boolean
@@ -49,7 +54,25 @@ interface UIState {
 
 let toastSeq = 0
 
+const VIEW_KEY = 'zhaska.view'
+const savedView = (): MainView => {
+  try {
+    return localStorage.getItem(VIEW_KEY) === 'assistant' ? 'assistant' : 'code'
+  } catch {
+    return 'code'
+  }
+}
+
 export const useUI = create<UIState>((set, get) => ({
+  view: savedView(),
+  setView: (view) => {
+    try {
+      localStorage.setItem(VIEW_KEY, view)
+    } catch {
+      /* sin almacenamiento: solo dura la sesión */
+    }
+    set({ view })
+  },
   dialog: null,
   settingsSection: 'general',
   onboarding: false,

@@ -13,6 +13,9 @@ import { AgentService } from '../services/agent'
 import { TerminalService } from '../services/terminals'
 import type { AgentHostBridge } from '../agentHost'
 import { ChatService } from '../services/chat'
+import { AssistantRepo, KnowledgeRepo } from '../assistant/repos'
+import { KnowledgeService } from '../assistant/knowledge'
+import { AssistantService } from '../assistant/service'
 import { checkRequirements, detectDevTools, detectHardware } from '../services/hardware'
 import { UpdateService } from '../services/updates'
 import { runCommand, defaultShell } from '@core/commands/runner'
@@ -157,6 +160,20 @@ export function registerHandlers(ctx: MainContext) {
     externalDirs: (projectId) => authorizedDirs(projectId).filter((d) => d.exists).map((d) => d.path),
     blockedDirs: [...new Set([...blockedReadRoots(app.getPath('home'), app.getPath('userData')), ...blockedReadRoots(realOr(app.getPath('home')), realOr(app.getPath('userData')))])],
   })
+
+  // Asistente de empresa (Fase 12): bases de conocimiento locales + chat sin herramientas
+  const knowledge = new KnowledgeService({
+    repo: new KnowledgeRepo(ctx.db),
+    ollama: () => ollama.api,
+    embedModel: () => settings.get('embedModel', 'embeddinggemma'),
+    extract: (file, ext, dir) => attachments.extractText(file, ext, dir),
+    workDir: join(app.getPath('userData'), 'kb-tmp'),
+    folderProblem: (abs) => rootProblem(realOr(abs)),
+    emit: (p) => send('kb.progress', p),
+  })
+  rmSync(join(app.getPath('userData'), 'kb-tmp'), { recursive: true, force: true })
+  knowledge.init()
+  const assistant = new AssistantService({ repo: new AssistantRepo(ctx.db), knowledge, settings, host: ctx.agentHost, attachments, emit: (e) => send('assistant.event', e) })
 
   // Banco de pruebas: el Agent Host mide; main guarda el resultado con el hardware detectado
   const benchJobs = new Map<string, string>()
@@ -327,6 +344,44 @@ export function registerHandlers(ctx: MainContext) {
     return authorizedDirs(id)
   })
 
+  handle('kb.list', () => knowledge.list())
+  handle('kb.create', ({ name, confidential }) => knowledge.create(name, confidential))
+  handle('kb.update', ({ id, name, confidential }) => knowledge.update(id, { name, confidential }))
+  handle('kb.delete', ({ id }) => {
+    // Las conversaciones guardadas dejan de usar la base borrada
+    for (const c of assistant.list()) if (c.collectionIds.includes(id)) assistant.update(c.id, { collectionIds: c.collectionIds.filter((x) => x !== id) })
+    knowledge.delete(id)
+  })
+  handle('kb.addFolder', async ({ id }) => {
+    knowledge.get(id)
+    const win = ctx.window()
+    const opts = { title: 'Añadir una carpeta a la base de conocimiento (solo se lee, nunca se modifica)', properties: ['openDirectory'] as 'openDirectory'[] }
+    const r = win ? await dialog.showOpenDialog(win, opts) : await dialog.showOpenDialog(opts)
+    const picked = r.canceled ? null : r.filePaths[0]
+    if (!picked) return null
+    return knowledge.addFolder(id, realpathSync.native(picked))
+  })
+  handle('kb.removeFolder', ({ folderId }) => knowledge.removeFolder(folderId))
+  handle('kb.reindex', ({ id }) => {
+    knowledge.get(id)
+    knowledge.reindex(id)
+  })
+  handle('kb.documents', ({ id }) => knowledge.documents(id))
+  handle('kb.openDocument', async ({ documentId }) => {
+    const abs = knowledge.documentPath(documentId)
+    if (!existsSync(abs)) throw new AppError('NOT_FOUND', 'El documento ya no está en su carpeta.')
+    const err = await shell.openPath(abs)
+    if (err) throw new AppError('IO', `No se pudo abrir el documento: ${err}`)
+  })
+  handle('assistant.list', () => assistant.list())
+  handle('assistant.create', (req) => assistant.create(req))
+  handle('assistant.update', ({ id, title, collectionIds }) => assistant.update(id, { title, collectionIds }))
+  handle('assistant.delete', ({ id }) => assistant.delete(id))
+  handle('assistant.messages', ({ conversationId }) => assistant.messages(conversationId))
+  handle('assistant.send', (req) => assistant.send(req))
+  handle('assistant.cancel', ({ taskId }) => assistant.cancel(taskId))
+  handle('assistant.active', () => assistant.active())
+
   handle('fs.list', ({ projectId, rel }) => session(projectId).files.list(rel))
   handle('fs.read', ({ projectId, rel }) => session(projectId).files.read(rel))
   handle('fs.write', ({ projectId, rel, content, encoding, expectedMtimeMs }) => session(projectId).files.write(rel, content, encoding, expectedMtimeMs))
@@ -446,7 +501,7 @@ export function registerHandlers(ctx: MainContext) {
   const tmpDir = join(dataDir, 'tmp')
   const importDir = join(userData, 'import')
   const attachmentsDir = join(userData, 'attachments')
-  const busyTasks = () => agent.active().length + chat.active().length
+  const busyTasks = () => agent.active().length + chat.active().length + assistant.active().length
   const ensureIdle = () => {
     if (busyTasks()) throw new AppError('CONFLICT', 'Hay una tarea del agente o del chat en curso. Espera a que termine o cancélala antes de continuar.')
   }
@@ -546,6 +601,7 @@ export function registerHandlers(ctx: MainContext) {
       sessions.forEach((s) => s.watcher?.stop())
       terminals.dispose()
       attachments.dispose()
+      knowledge.dispose()
       ollama.dispose()
     },
   }

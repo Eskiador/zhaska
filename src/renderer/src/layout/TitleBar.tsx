@@ -15,6 +15,7 @@ export function TitleBar() {
   const collapsed = useLayout((s) => s.collapsed)
   const toggle = useLayout((s) => s.toggle)
   const openDialog = useUI((s) => s.openDialog)
+  const assistant = useUI((s) => s.view === 'assistant')
   const sidebarHidden = collapsed.sidebar
 
   return (
@@ -27,7 +28,9 @@ export function TitleBar() {
     >
       {sidebarHidden && <IconButton className="no-drag" label="Mostrar barra lateral" shortcut={`${MOD} B`} icon={<PanelLeft />} onClick={() => toggle('sidebar')} />}
 
-      {project && (
+      {assistant && <span className="no-drag truncate text-body text-fg-2">Chat · asistente de oficina</span>}
+
+      {project && !assistant && (
         <div className="no-drag flex min-w-0 items-center gap-2">
           <span className="truncate text-body text-fg-2" title={project.rootPath}>
             {project.name}
@@ -61,7 +64,7 @@ export function TitleBar() {
 
       <OllamaPill />
 
-      {project && (
+      {project && !assistant && (
         <div className="no-drag flex items-center gap-0.5">
           <IconButton label="Barra lateral" shortcut={`${MOD} B`} icon={<PanelLeft />} active={!collapsed.sidebar} onClick={() => toggle('sidebar')} />
           <IconButton label="Actividad" shortcut={`⇧${MOD} I`} icon={<Activity />} active={!collapsed.activity} onClick={() => toggle('activity')} />

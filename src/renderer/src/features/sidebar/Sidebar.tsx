@@ -1,7 +1,8 @@
 import { useMemo, useState, type ReactNode } from 'react'
-import { Clock, Files, FolderOpen, FolderPlus, PanelLeft, Pencil, Plus, Settings, SquarePen, Trash, X } from 'lucide-react'
+import { Clock, Code2, Files, FolderOpen, FolderPlus, MessageSquare, PanelLeft, Pencil, Plus, Settings, SquarePen, Trash, X } from 'lucide-react'
 import { IconButton } from '@renderer/components/ui/Button'
-import { Kbd } from '@renderer/components/ui/primitives'
+import { Kbd, Segmented } from '@renderer/components/ui/primitives'
+import { AssistantSidebar } from '@renderer/features/assistant/AssistantView'
 import { openContextMenu } from '@renderer/components/ui/overlays'
 import { confirm } from '@renderer/components/ui/confirm'
 import { LogoMark } from '@renderer/components/Logo'
@@ -55,6 +56,8 @@ export function Sidebar() {
   const recents = useProjects((s) => s.recents)
   const explorerOpen = useLayout((s) => !s.collapsed.explorer)
   const openDialog = useUI((s) => s.openDialog)
+  const view = useUI((s) => s.view)
+  const toCode = () => useUI.getState().setView('code')
   const groups = useMemo(() => groupByDate(conversations), [conversations])
   const [renaming, setRenaming] = useState<string | null>(null)
 
@@ -72,112 +75,140 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex flex-col gap-0.5 px-2.5">
-        <NavRow
-          primary
-          icon={<SquarePen />}
-          label="Nueva conversación"
-          shortcut={`${MOD} N`}
-          disabled={!project}
-          onClick={() => project && void useChat.getState().newConversation(project.id)}
+      <div className="px-2.5 pb-3" title={`Cambiar entre Chat y Código (${MOD} ⇧ M)`}>
+        <Segmented
+          full
+          value={view}
+          onChange={(v) => useUI.getState().setView(v)}
+          options={[
+            { value: 'assistant', label: 'Chat', icon: <MessageSquare /> },
+            { value: 'code', label: 'Código', icon: <Code2 /> },
+          ]}
         />
-        <NavRow icon={<FolderPlus />} label="Nuevo proyecto" shortcut={`⇧${MOD} N`} onClick={() => openDialog('newProject')} />
-        <NavRow icon={<Clock />} label="Historial" shortcut={`${MOD} K`} onClick={() => openDialog('palette')} />
-        <NavRow icon={<Files />} label="Explorador de archivos" shortcut={`⇧${MOD} E`} active={!!project && explorerOpen} disabled={!project} onClick={() => useLayout.getState().toggle('explorer')} />
-      </nav>
-
-      <div className="mt-4 min-h-0 flex-1 overflow-y-auto pb-2">
-        <SectionTitle
-          action={<IconButton size="sm" label="Abrir carpeta" icon={<Plus />} onClick={() => (hasBackend ? void pickAndOpenFolder() : openDialog('newProject'))} />}
-        >
-          Proyectos recientes
-        </SectionTitle>
-        <div className="flex flex-col gap-px px-2.5">
-          {recents.slice(0, 6).map((p) => {
-            const active = project?.id === p.id
-            return (
-              <button
-                key={p.id}
-                type="button"
-                title={p.rootPath}
-                onClick={() => !active && void openProjectById(p.id)}
-                onContextMenu={(e) =>
-                  openContextMenu(e, [
-                    { id: 'open', label: 'Abrir', icon: <FolderOpen />, onSelect: () => void openProjectById(p.id) },
-                    { id: 'forget', label: 'Quitar de recientes', icon: <X />, onSelect: () => void forgetProject(p.id) },
-                  ])
-                }
-                className={cn('group flex h-[30px] items-center gap-2.5 rounded-md px-2 text-left text-body', active ? 'bg-bg-3 text-fg-1' : 'text-fg-2 hover:bg-bg-2 hover:text-fg-1', !p.exists && 'opacity-60')}
-              >
-                <span className="grid size-[18px] shrink-0 place-items-center rounded-[5px] bg-bg-3 text-micro font-semibold" style={{ color: avatarColor(p.name) }}>
-                  {p.name.slice(0, 1).toUpperCase()}
-                </span>
-                <span className="flex-1 truncate">{p.name}</span>
-                <span className={cn('text-tiny', p.exists ? 'text-fg-3' : 'text-err')}>{!p.exists ? 'no encontrada' : active ? 'abierto' : relativeTime(p.lastOpenedAt)}</span>
-              </button>
-            )
-          })}
-          {recents.length === 0 && (
-            <button type="button" onClick={openDemo} className="flex h-[30px] items-center gap-2.5 rounded-md px-2 text-left text-body text-fg-3 hover:bg-bg-2 hover:text-fg-1">
-              <span className="grid size-[18px] place-items-center rounded-[5px] bg-bg-3 text-micro font-semibold text-warn">D</span>
-              Proyecto de demostración
-            </button>
-          )}
-        </div>
-
-        {project && (
-          <>
-            <SectionTitle className="mt-4">Conversaciones</SectionTitle>
-            {groups.length === 0 && <div className="px-4 py-1 text-small text-fg-3">Todavía no hay conversaciones en este proyecto.</div>}
-            {groups.map(([label, list]) => (
-              <div key={label} className="mb-1.5">
-                <div className="px-4 pt-1 pb-1 text-small text-fg-3">{label}</div>
-                <div className="flex flex-col gap-px px-2.5">
-                  {list.map((c) =>
-                    renaming === c.id ? (
-                      <InlineInput
-                        key={c.id}
-                        initial={c.title}
-                        onDone={(v) => {
-                          setRenaming(null)
-                          if (v !== null) void useChat.getState().rename(c.id, v)
-                        }}
-                      />
-                    ) : (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => void useChat.getState().select(c.id)}
-                        onDoubleClick={() => setRenaming(c.id)}
-                        onContextMenu={(e) =>
-                          openContextMenu(e, [
-                            { id: 'rename', label: 'Renombrar', icon: <Pencil />, onSelect: () => setRenaming(c.id) },
-                            { id: 'sep', separator: true },
-                            {
-                              id: 'delete',
-                              label: 'Eliminar conversación',
-                              icon: <Trash />,
-                              danger: true,
-                              onSelect: async () => {
-                                const ok = await confirm({ title: 'Eliminar conversación', description: `Se eliminará «${c.title}» y todos sus mensajes. No se puede deshacer.`, confirmLabel: 'Eliminar', danger: true })
-                                if (ok) void useChat.getState().remove(c.id)
-                              },
-                            },
-                          ])
-                        }
-                        className={cn('flex h-[30px] items-center gap-2 rounded-md px-2 text-left text-body', c.id === activeId ? 'bg-bg-3 text-fg-1' : 'text-fg-2 hover:bg-bg-2 hover:text-fg-1')}
-                      >
-                        <span className="flex-1 truncate">{c.title}</span>
-                        {c.id === activeId && <span className="size-1.5 shrink-0 rounded-full bg-accent" />}
-                      </button>
-                    ),
-                  )}
-                </div>
-              </div>
-            ))}
-          </>
-        )}
       </div>
+
+      {view === 'assistant' ? (
+        <AssistantSidebar />
+      ) : (
+        <>
+          <nav className="flex flex-col gap-0.5 px-2.5">
+            <NavRow
+              primary
+              icon={<SquarePen />}
+              label="Nueva conversación"
+              shortcut={`${MOD} N`}
+              disabled={!project}
+              onClick={() => {
+                toCode()
+                if (project) void useChat.getState().newConversation(project.id)
+              }}
+            />
+            <NavRow icon={<FolderPlus />} label="Nuevo proyecto" shortcut={`⇧${MOD} N`} onClick={() => openDialog('newProject')} />
+            <NavRow icon={<Clock />} label="Historial" shortcut={`${MOD} K`} onClick={() => openDialog('palette')} />
+            <NavRow icon={<Files />} label="Explorador de archivos" shortcut={`⇧${MOD} E`} active={!!project && explorerOpen} disabled={!project} onClick={() => useLayout.getState().toggle('explorer')} />
+          </nav>
+
+          <div className="mt-4 min-h-0 flex-1 overflow-y-auto pb-2">
+            <SectionTitle
+              action={<IconButton size="sm" label="Abrir carpeta" icon={<Plus />} onClick={() => (hasBackend ? void pickAndOpenFolder() : openDialog('newProject'))} />}
+            >
+              Proyectos recientes
+            </SectionTitle>
+            <div className="flex flex-col gap-px px-2.5">
+              {recents.slice(0, 6).map((p) => {
+                const active = project?.id === p.id
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    title={p.rootPath}
+                    onClick={() => {
+                      toCode()
+                      if (!active) void openProjectById(p.id)
+                    }}
+                    onContextMenu={(e) =>
+                      openContextMenu(e, [
+                        { id: 'open', label: 'Abrir', icon: <FolderOpen />, onSelect: () => void openProjectById(p.id) },
+                        { id: 'forget', label: 'Quitar de recientes', icon: <X />, onSelect: () => void forgetProject(p.id) },
+                      ])
+                    }
+                    className={cn('group flex h-[30px] items-center gap-2.5 rounded-md px-2 text-left text-body', active ? 'bg-bg-3 text-fg-1' : 'text-fg-2 hover:bg-bg-2 hover:text-fg-1', !p.exists && 'opacity-60')}
+                  >
+                    <span className="grid size-[18px] shrink-0 place-items-center rounded-[5px] bg-bg-3 text-micro font-semibold" style={{ color: avatarColor(p.name) }}>
+                      {p.name.slice(0, 1).toUpperCase()}
+                    </span>
+                    <span className="flex-1 truncate">{p.name}</span>
+                    <span className={cn('text-tiny', p.exists ? 'text-fg-3' : 'text-err')}>{!p.exists ? 'no encontrada' : active ? 'abierto' : relativeTime(p.lastOpenedAt)}</span>
+                  </button>
+                )
+              })}
+              {recents.length === 0 && (
+                <button type="button" onClick={openDemo} className="flex h-[30px] items-center gap-2.5 rounded-md px-2 text-left text-body text-fg-3 hover:bg-bg-2 hover:text-fg-1">
+                  <span className="grid size-[18px] place-items-center rounded-[5px] bg-bg-3 text-micro font-semibold text-warn">D</span>
+                  Proyecto de demostración
+                </button>
+              )}
+            </div>
+
+            {project && (
+              <>
+                <SectionTitle className="mt-4">Conversaciones</SectionTitle>
+                {groups.length === 0 && <div className="px-4 py-1 text-small text-fg-3">Todavía no hay conversaciones en este proyecto.</div>}
+                {groups.map(([label, list]) => (
+                  <div key={label} className="mb-1.5">
+                    <div className="px-4 pt-1 pb-1 text-small text-fg-3">{label}</div>
+                    <div className="flex flex-col gap-px px-2.5">
+                      {list.map((c) =>
+                        renaming === c.id ? (
+                          <InlineInput
+                            key={c.id}
+                            initial={c.title}
+                            onDone={(v) => {
+                              setRenaming(null)
+                              if (v !== null) void useChat.getState().rename(c.id, v)
+                            }}
+                          />
+                        ) : (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => {
+                              toCode()
+                              void useChat.getState().select(c.id)
+                            }}
+                            onDoubleClick={() => setRenaming(c.id)}
+                            onContextMenu={(e) =>
+                              openContextMenu(e, [
+                                { id: 'rename', label: 'Renombrar', icon: <Pencil />, onSelect: () => setRenaming(c.id) },
+                                { id: 'sep', separator: true },
+                                {
+                                  id: 'delete',
+                                  label: 'Eliminar conversación',
+                                  icon: <Trash />,
+                                  danger: true,
+                                  onSelect: async () => {
+                                    const ok = await confirm({ title: 'Eliminar conversación', description: `Se eliminará «${c.title}» y todos sus mensajes. No se puede deshacer.`, confirmLabel: 'Eliminar', danger: true })
+                                    if (ok) void useChat.getState().remove(c.id)
+                                  },
+                                },
+                              ])
+                            }
+                            className={cn('flex h-[30px] items-center gap-2 rounded-md px-2 text-left text-body', c.id === activeId ? 'bg-bg-3 text-fg-1' : 'text-fg-2 hover:bg-bg-2 hover:text-fg-1')}
+                          >
+                            <span className="flex-1 truncate">{c.title}</span>
+                            {c.id === activeId && <span className="size-1.5 shrink-0 rounded-full bg-accent" />}
+                          </button>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+
+        </>
+      )}
 
       <div className="px-2.5 pb-2.5">
         <ModelCard />

@@ -100,6 +100,23 @@ export const CHANNELS = [
   'update.check',
   'update.download',
   'update.install',
+  'kb.list',
+  'kb.create',
+  'kb.update',
+  'kb.delete',
+  'kb.addFolder',
+  'kb.removeFolder',
+  'kb.reindex',
+  'kb.documents',
+  'kb.openDocument',
+  'assistant.list',
+  'assistant.create',
+  'assistant.update',
+  'assistant.delete',
+  'assistant.messages',
+  'assistant.send',
+  'assistant.cancel',
+  'assistant.active',
 ] as const
 
-export const EVENTS = ['fs.changed', 'ollama.status', 'ollama.installProgress', 'models.pull', 'chat.event', 'agent.event', 'bench.event', 'terminal.data', 'terminal.exit', 'projects.log', 'attachments.updated', 'update.status'] as const
+export const EVENTS = ['fs.changed', 'ollama.status', 'ollama.installProgress', 'models.pull', 'chat.event', 'agent.event', 'bench.event', 'terminal.data', 'terminal.exit', 'projects.log', 'attachments.updated', 'update.status', 'kb.progress', 'assistant.event'] as const

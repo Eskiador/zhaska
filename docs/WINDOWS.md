@@ -74,6 +74,15 @@ Con Ollama en marcha y el modelo descargado:
 - En la app: **Configuración → Modelos → Banco de pruebas** (velocidad, contexto y llamadas a herramientas).
 - Desde el código (si tienes Node en el PC): `ZHASKA_EVAL_MODEL=gemma4:12b-it-qat npm run eval:agent` (7 tareas reales del agente).
 
-## 6. Desinstalar
+## 6. Asistente de oficina (Fase 12)
+
+1. Arriba de la barra lateral, pulsa **Chat** (o Ctrl+Mayús+M).
+2. En **Bases de conocimiento**, pulsa el icono de carpeta, ponle un nombre y elige una carpeta con documentos que puedas usar libremente (PDF, Word, Excel…). La primera vez pedirá descargar el modelo de búsqueda **embeddinggemma** (≈ 620 MB).
+3. Espera a que termine de indexar (verás «Indexando N de M») y pregunta algo cuya respuesta esté en un documento. Comprueba que la respuesta cita la fuente y que **Abrir** abre el documento.
+4. Pregunta algo que no esté en los documentos: debe responder «No aparece en tus documentos».
+5. Prueba **Privada** y una base marcada como **Confidencial**: al cerrar y abrir ZHASKA, esas conversaciones no deben aparecer.
+6. Anota el tiempo de respuesta con Gemma 4 E4B y con 12B (selector de modelo arriba a la derecha).
+
+## 7. Desinstalar
 
 **Configuración de Windows → Aplicaciones → ZHASKA → Desinstalar**. El desinstalador quita el programa y **no borra tus datos** (`%APPDATA%\ZHASKA`) ni tus proyectos. Si quieres borrarlos, hazlo a mano después.

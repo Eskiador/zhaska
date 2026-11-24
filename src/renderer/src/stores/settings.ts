@@ -42,6 +42,10 @@ export interface Settings {
   checkUpdates: boolean
   checkpointRetentionDays: number
   backupsKeep: number
+  /** Modelo de embeddings de las bases de conocimiento (Fase 12) */
+  embedModel: string
+  /** Modelo del asistente de empresa ('' = el activo) */
+  assistantModel: string
 }
 
 export const AUTONOMY_PRESETS: Record<Autonomy, Record<PermissionAction, ActionPolicy>> = {
@@ -83,6 +87,8 @@ export const DEFAULT_SETTINGS: Settings = {
   checkUpdates: true,
   checkpointRetentionDays: 30,
   backupsKeep: 7,
+  embedModel: 'embeddinggemma',
+  assistantModel: '',
 }
 
 interface SettingsStore extends Settings {

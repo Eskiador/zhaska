@@ -1,3 +1,4 @@
+import { isChatModel } from '@shared/assistant'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Check, ChevronRight, Download, Search } from 'lucide-react'
@@ -44,7 +45,7 @@ export function ModelPicker({ anchor, onClose }: { anchor: HTMLElement; onClose:
   }, [anchor, onClose])
 
   const match = (name: string) => !q || name.toLowerCase().includes(q.toLowerCase())
-  const local = useMemo(() => installed.filter((m) => match(m.name)), [installed, q]) // eslint-disable-line react-hooks/exhaustive-deps
+  const local = useMemo(() => installed.filter((m) => isChatModel(m) && match(m.name)), [installed, q]) // eslint-disable-line react-hooks/exhaustive-deps
   const downloadable = GEMMA4_VARIANTS.filter((v) => !isInstalled(installed, v.tag) && match(v.tag) && v.quant === 'QAT')
 
   const choose = (name: string) => {

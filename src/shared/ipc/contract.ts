@@ -292,6 +292,39 @@ export const AuthorizedDirSchema = z.object({ path: z.string(), addedAt: z.numbe
 
 export const TerminalSchema = z.object({ id: Id, projectId: Id, title: z.string(), shell: z.string(), alive: z.boolean() })
 
+/* ───── Asistente de empresa (Fase 12) ───── */
+export const KbProgressSchema = z.object({ collectionId: Id, phase: z.enum(['scanning', 'indexing', 'idle']), done: z.number(), total: z.number(), current: z.string().nullable(), errors: z.number() })
+export const KbCollectionSchema = z.object({
+  id: Id,
+  name: z.string(),
+  /** Sus conversaciones son siempre privadas: nada se guarda en disco */
+  confidential: z.boolean(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+  documents: z.number(),
+  chunks: z.number(),
+  errors: z.number(),
+  folders: z.array(z.object({ id: Id, path: z.string() })),
+  indexing: KbProgressSchema.nullable(),
+})
+export const KbDocumentSchema = z.object({
+  id: Id,
+  collectionId: Id,
+  folderPath: z.string(),
+  relPath: z.string(),
+  name: z.string(),
+  size: z.number(),
+  status: z.enum(['indexed', 'error']),
+  error: z.string().nullable(),
+  pages: z.number().nullable(),
+  chunks: z.number(),
+  indexedAt: z.number(),
+})
+export const AssistantConversationSchema = z.object({ id: Id, title: z.string(), collectionIds: z.array(Id), createdAt: z.number(), updatedAt: z.number(), messageCount: z.number(), private: z.boolean() })
+export const AssistantMessageSchema = z.object({ id: Id, conversationId: Id, role: z.enum(['user', 'assistant']), blocks: z.array(z.unknown()), model: z.string().nullable(), metrics: ChatMetricsSchema.nullable(), createdAt: z.number() })
+export const AssistantSourceSchema = z.object({ n: z.number(), documentId: Id, collectionId: Id, name: z.string(), relPath: z.string(), page: z.number().nullable(), section: z.string().nullable(), text: z.string() })
+const KbName = z.string().trim().min(1).max(80)
+
 const none = z.undefined()
 
 export const contract = {
@@ -455,6 +488,31 @@ export const contract = {
   'update.check': { req: none, res: UpdateStatusSchema },
   'update.download': { req: none, res: UpdateStatusSchema },
   'update.install': { req: none, res: z.void() },
+
+  /** Bases de conocimiento: carpetas elegidas en el selector (lo abre main), solo lectura, índice local. */
+  'kb.list': { req: none, res: z.array(KbCollectionSchema) },
+  'kb.create': { req: z.object({ name: KbName, confidential: z.boolean() }), res: z.array(KbCollectionSchema) },
+  'kb.update': { req: z.object({ id: Id, name: KbName.optional(), confidential: z.boolean().optional() }), res: KbCollectionSchema },
+  'kb.delete': { req: z.object({ id: Id }), res: z.void() },
+  'kb.addFolder': { req: z.object({ id: Id }), res: KbCollectionSchema.nullable() },
+  'kb.removeFolder': { req: z.object({ folderId: Id }), res: KbCollectionSchema },
+  'kb.reindex': { req: z.object({ id: Id }), res: z.void() },
+  'kb.documents': { req: z.object({ id: Id }), res: z.array(KbDocumentSchema) },
+  /** Abre el documento original con su programa (solo documentos indexados, por id) */
+  'kb.openDocument': { req: z.object({ documentId: Id }), res: z.void() },
+
+  /** Chat del asistente: sin proyecto y sin herramientas. */
+  'assistant.list': { req: none, res: z.array(AssistantConversationSchema) },
+  'assistant.create': { req: z.object({ collectionIds: z.array(Id).max(50), private: z.boolean() }), res: AssistantConversationSchema },
+  'assistant.update': { req: z.object({ id: Id, title: z.string().min(1).max(200).optional(), collectionIds: z.array(Id).max(50).optional() }), res: AssistantConversationSchema },
+  'assistant.delete': { req: z.object({ id: Id }), res: z.void() },
+  'assistant.messages': { req: z.object({ conversationId: Id }), res: z.array(AssistantMessageSchema) },
+  'assistant.send': {
+    req: z.object({ conversationId: Id, text: z.string().min(1).max(100_000), model: ModelName, attachmentIds: AttachmentIds }),
+    res: z.object({ taskId: Id, message: AssistantMessageSchema, conversation: AssistantConversationSchema }),
+  },
+  'assistant.cancel': { req: z.object({ taskId: Id }), res: z.void() },
+  'assistant.active': { req: none, res: z.array(z.object({ taskId: Id, conversationId: Id, text: z.string(), model: z.string() })) },
 } as const
 
 export const ChatEventSchema = z.object({
@@ -464,6 +522,19 @@ export const ChatEventSchema = z.object({
   state: z.enum(['loading', 'prompt', 'thinking', 'generating']).optional(),
   text: z.string().optional(),
   message: MessageSchema.optional(),
+  metrics: ChatMetricsSchema.optional(),
+  code: z.string().optional(),
+  error: z.string().optional(),
+})
+
+export const AssistantEventSchema = z.object({
+  taskId: Id,
+  conversationId: Id,
+  type: z.enum(['state', 'sources', 'delta', 'done', 'cancelled', 'error']),
+  state: z.enum(['searching', 'loading', 'prompt', 'thinking', 'generating']).optional(),
+  sources: z.array(AssistantSourceSchema).optional(),
+  text: z.string().optional(),
+  message: AssistantMessageSchema.optional(),
   metrics: ChatMetricsSchema.optional(),
   code: z.string().optional(),
   error: z.string().optional(),
@@ -482,6 +553,8 @@ export const events = {
   'attachments.updated': AttachmentSchema.extend({ progress: z.string().optional() }),
   'bench.event': z.object({ jobId: Id, model: z.string(), type: z.enum(['progress', 'done', 'error']), step: z.string().optional(), index: z.number().optional(), total: z.number().optional(), record: BenchRecordSchema.optional(), error: z.string().optional() }),
   'update.status': UpdateStatusSchema,
+  'kb.progress': KbProgressSchema,
+  'assistant.event': AssistantEventSchema,
 } as const
 
 export type Channel = keyof typeof contract
@@ -516,6 +589,12 @@ export type UpdateStatus = z.output<typeof UpdateStatusSchema>
 export type Metrics = z.output<typeof MetricsSchema>
 export type DevTools = z.output<typeof DevToolsSchema>
 export type LastOperation = z.output<typeof LastOperationSchema>
+export type KbCollection = z.output<typeof KbCollectionSchema>
+export type KbDocument = z.output<typeof KbDocumentSchema>
+export type KbProgress = z.output<typeof KbProgressSchema>
+export type AssistantConversation = z.output<typeof AssistantConversationSchema>
+export type AssistantMessage = z.output<typeof AssistantMessageSchema>
+export type AssistantEvent = z.output<typeof AssistantEventSchema>
 
 /** Resultado serializable de cada llamada: los errores llegan estructurados, nunca como excepciones opacas. */
 export type IpcResult<T> = { ok: true; data: T } | { ok: false; error: { code: IpcErrorCode; message: string } }

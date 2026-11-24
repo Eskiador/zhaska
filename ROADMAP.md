@@ -16,7 +16,7 @@ Leyenda: ✅ terminada · 🔄 en curso · ⏳ pendiente
 | 9 | Seguridad y persistencia (endurecimiento) | ✅ |
 | 10 | Instalación y actualizaciones | ✅ (instalado y funcionando en el PC Windows, 24-11-2026; falta probar ahí la actualización) |
 | 11 | Pruebas y optimización | ✅ Aprobada (24-11-2026) |
-| 12 | Asistente de empresa (chat aparte con tus documentos) | ⏳ pendiente de aprobación para empezar |
+| 12 | Asistente de oficina (modo Chat con tus documentos) | ✅ terminada; pendiente de aprobación |
 
 **Hito v0.1 "primer agente útil"** = fases 2–7: abrir un proyecto, pedir un cambio a Gemma, verlo trabajar en el panel de actividad, revisar el diff y aceptarlo.
 **Hito v1.0** = fases 8–11: adjuntos, endurecimiento, instalador y updates.
@@ -252,9 +252,22 @@ El 12B no cabe en 8 GB ni con poco contexto (lo que no cabe es el modelo, no el 
 Alcance original:
 Rendimiento (arranque < 2 s, proyecto de 50 000 archivos navegable), memoria, pruebas de larga duración del agente, ajuste de prompts por modelo.
 
-## Fase 12 — Asistente de empresa ⏳
+## Fase 12 — Asistente de oficina ✅
 
-**Añadida el 24-11-2026.** Un chat aparte del de programación para el trabajo de oficina (Back Office en Angel Camacho): preguntar a tus documentos, resumir, redactar y traducir, **sin que nada salga del PC**.
+**Resultado (24-11-2026).** Detalle técnico en ARCHITECTURE §15; propuesta para IT en [docs/PROPUESTA-IT.md](docs/PROPUESTA-IT.md).
+- **Selector Chat / Código** arriba de la barra lateral, como en la app de Claude (Ctrl+Mayús+M). En Chat, la barra lateral muestra las conversaciones del asistente y las bases de conocimiento.
+- **Bases de conocimiento** locales (carpetas elegidas, solo lectura, se ponen al día solas) con búsqueda combinada por palabras y por significado (EmbeddingGemma); **respuestas con fuentes** desplegables y «Abrir»; aviso si cita fuentes inexistentes o da cifras sin citar; **conversaciones privadas** y **bases confidenciales**; plantillas (resumir, correo, traducir, comparar Excel, tabla) y adjuntos.
+- El modo Chat usa **Gemma 4 E4B** por defecto si está instalado: en la evaluación rinde igual que el 12B y es 2–4 veces más rápido (en el PC, ~10 veces).
+
+**Criterios de salida comprobados**:
+- Evaluación (`tests/eval/assistant.eval.ts`, 8 documentos de una empresa ficticia, 12 preguntas con respuesta y 4 sin ella): E4B y 12B **12/12 aciertos, 12/12 citas correctas (objetivo ≥ 90 %), 4/4 «No aparece en tus documentos», 0 datos inventados**; 20 s y 49 s por respuesta en el Mac.
+- **Sin tráfico fuera del PC**: en las pruebas y la evaluación, todas las peticiones van a `127.0.0.1` (comprobado con `diagnostics_channel`).
+- Pruebas automáticas: 267 (11 nuevas: troceado, búsqueda, índice real de PDF/Word/Excel/texto, actualización al cambiar o borrar, carpetas sensibles, privadas y confidenciales que no tocan el disco, red). Prueba completa de la app con Gemma: **65/65** (6 nuevas).
+- **Propuesta para IT**: escrita en `docs/PROPUESTA-IT.md`; pendiente de que la revises.
+
+**Pendiente**: probarlo en el PC con Windows (docs/WINDOWS.md §6) y revisar la propuesta para IT.
+
+**Añadida el 24-11-2026.** Un chat aparte del de programación para el trabajo de oficina (administración, Back Office): preguntar a tus documentos, resumir, redactar y traducir, **sin que nada salga del PC**.
 
 **Decisiones del usuario (24-11-2026)**:
 - Funciona **primero solo en el PC del usuario**, dentro de ZHASKA. Llevarlo a un servidor de la empresa sería otra fase, y solo con permiso de IT.

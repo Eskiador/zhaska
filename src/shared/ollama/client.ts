@@ -206,6 +206,13 @@ export class OllamaClient {
     }
   }
 
+  /** Vectores de significado (embeddings) de varios textos, en el mismo orden (Fase 12: bases de conocimiento). */
+  async embed(model: string, input: string[], signal?: AbortSignal): Promise<number[][]> {
+    const r = await this.json<{ embeddings?: number[][]; error?: string }>('/api/embed', { method: 'POST', body: JSON.stringify({ model, input, truncate: true }), signal, timeoutMs: 300_000 })
+    if (!r.embeddings || r.embeddings.length !== input.length) throw new OllamaError('protocol', r.error ?? 'Ollama no devolvió los vectores esperados')
+    return r.embeddings
+  }
+
   /** Petición de chat sin streaming (banco de pruebas, utilidades). */
   async chatOnce(body: ChatBody, signal?: AbortSignal): Promise<OllamaChatChunk> {
     return this.json<OllamaChatChunk>('/api/chat', { method: 'POST', body: JSON.stringify({ ...body, stream: false }), signal })

@@ -5,10 +5,11 @@ Entorno de programación de escritorio para Windows con un **agente de IA que se
 - **Local-first**: modelos vía [Ollama](https://ollama.com) (Gemma 4 por defecto). Tus proyectos, conversaciones y documentos no salen de tu equipo.
 - **Agente propio**, independiente del modelo: puedes cambiar de modelo sin cambiar la aplicación.
 - **IDE completo**: Monaco, terminal real, explorador, diff con aceptar/rechazar, checkpoints.
+- **Asistente de oficina**: un chat aparte para preguntar a tus documentos (carpetas que eliges, indexadas en local), resumir, redactar y traducir. Cita de qué documento y página sale cada dato y, si no lo encuentra, lo dice. Conversaciones privadas que no se guardan y bases confidenciales.
 - **Adjuntos**: PDF (también escaneados, con OCR), Word, Excel, CSV, código, imágenes y ZIP. Se procesan en local y la IA puede leerlos pero no modificarlos.
 - **Seguro por defecto**: el agente trabaja dentro del proyecto; lo peligroso, los borrados, los archivos protegidos y cualquier lectura fuera del proyecto piden tu confirmación. Copias de seguridad diarias que puedes restaurar, y exportar o importar todos tus datos en un archivo.
 
-> **Estado: las 11 fases del plan están completadas y aprobadas; la Fase 12 (asistente de empresa) está añadida y pendiente de empezar.** Instalado y funcionando en el PC con Windows (24-11-2026); quedan por hacer allí la prueba de actualización y las mediciones completas del agente con la RTX 5060, siguiendo [docs/WINDOWS.md](docs/WINDOWS.md). Ver [ROADMAP.md](ROADMAP.md).
+> **Estado: las 11 fases del plan están completadas y aprobadas; la Fase 12 (asistente de oficina) está terminada y pendiente de tu aprobación.** Instalado y funcionando en el PC con Windows (24-11-2026); quedan por hacer allí la prueba de actualización y las mediciones completas del agente con la RTX 5060, siguiendo [docs/WINDOWS.md](docs/WINDOWS.md). Ver [ROADMAP.md](ROADMAP.md).
 
 ## Instalación (Windows)
 
@@ -25,6 +26,7 @@ Actualizaciones: si las activas, ZHASKA consulta GitHub Releases al iniciar y ca
 |---|---|
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Procesos, IPC, agente, herramientas, Ollama, almacenamiento, seguridad, estructura de carpetas, riesgos |
 | [docs/WINDOWS.md](docs/WINDOWS.md) | Probar en Windows: instalador, asistente inicial, primera tarea y actualización |
+| [docs/PROPUESTA-IT.md](docs/PROPUESTA-IT.md) | Propuesta para IT: qué hace el asistente de oficina, qué datos toca, red, riesgos y resultados medidos |
 | [docs/SECURITY.md](docs/SECURITY.md) | Modelo de amenazas, lista de comprobación de Electron, auditoría del IPC, permisos del agente, copias y restauración |
 | [docs/MODELS.md](docs/MODELS.md) | Análisis de Gemma 4 en Ollama para una RTX 5060 de 8 GB y recomendación |
 | [docs/DESIGN.md](docs/DESIGN.md) | Sistema de diseño: tokens, tipografía, disposición, componentes |

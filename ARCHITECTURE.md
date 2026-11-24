@@ -581,3 +581,18 @@ Medido sobre la app **empaquetada** con `npm run test:perf` (`scripts/perf-e2e.m
 
 - `fs.findFiles` (`src/core/workspace/fileIndex.ts`): búsqueda difusa (letras en orden, más peso al nombre, a las letras seguidas y a los inicios de palabra) sobre hasta 300 000 rutas; la paleta (Ctrl K) busca en todo el proyecto, no solo en lo abierto.
 - En el PC de destino los tiempos serán algo mayores (CPU y disco distintos): `npm run test:perf` sobre `dist/win-unpacked` lo mide allí.
+
+## 15. Asistente de empresa (Fase 12)
+
+Chat aparte del de programación para trabajo de oficina, con bases de conocimiento locales. Separado por diseño: sin proyecto, **sin herramientas** (no lee, escribe ni ejecuta nada por su cuenta) y con sus propias tablas.
+
+| Pieza | Archivo | Qué hace |
+|---|---|---|
+| Esquema | `src/main/db/migrations.ts` (v6) | `kb_collections`, `kb_folders`, `kb_documents`, `kb_chunks` (texto + vector Float32 normalizado), `kb_chunks_fts` (FTS5, BM25, sin tildes), `assistant_conversations`, `assistant_messages` |
+| Índice | `src/main/assistant/knowledge.ts` | Recorre las carpetas elegidas (sin enlaces, ocultos ni dependencias; ≤ 5 000 archivos por carpeta, ≤ 50 MB cada uno), extrae el texto con el extractor de adjuntos (`AttachmentService.extractText`, mismo proceso aislado), trocea (`text.ts`: por páginas y hojas, ~1 200 caracteres con solape) y calcula vectores con EmbeddingGemma en Ollama (`/api/embed`, prefijos de consulta/documento). Solo reindexa lo que cambió (tamaño, fecha o modelo); vigila las carpetas (`fs.watch` recursivo, 3 s de calma) |
+| Búsqueda | `knowledge.search` | Palabras (FTS5) + significado (producto escalar en memoria, caché por base, similitud mínima 0,35) fusionadas con Reciprocal Rank Fusion; 8 fragmentos |
+| Chat | `src/main/assistant/service.ts` | Busca, añade los fragmentos numerados a la pregunta, genera con el Agent Host (`chat.start`, temperatura ≤ 0,3) y guarda la respuesta con sus fuentes (marcadas si se citan). `checkAnswer` avisa si cita números que no existen o da cifras sin citar |
+| Reglas del modelo | `src/shared/assistant.ts` | Citar `[n]`, decir «No aparece en tus documentos» si no está, no inventar, copiar importes tal cual |
+| Interfaz | `src/renderer/src/features/assistant/AssistantView.tsx`, `stores/assistant.ts` | Vista «Asistente de oficina»: conversaciones (normales y privadas), bases de conocimiento (carpetas, documentos, errores, progreso), fuentes desplegables con «Abrir», plantillas y adjuntos |
+
+**Privacidad**: conversaciones **privadas** solo en memoria; una base **confidencial** obliga a conversación privada (y una conversación guardada no puede conectarla). Las carpetas pasan por la misma comprobación de carpetas sensibles que los proyectos (`workspaceRootProblem`). «Abrir» un documento solo acepta ids de documentos indexados. Las pruebas comprueban con `diagnostics_channel` que toda la red va a `127.0.0.1`.

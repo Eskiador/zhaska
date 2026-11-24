@@ -157,4 +157,78 @@ export const MIGRATIONS: Migration[] = [
       CREATE INDEX idx_message_attachments_att ON message_attachments (attachment_id);
     `,
   },
+  {
+    version: 6,
+    name: 'assistant-knowledge',
+    sql: `
+      -- Asistente de empresa (Fase 12): separado de los proyectos. Los documentos se leen de las carpetas que
+      -- elige el usuario (solo lectura); aquí solo su texto troceado y los vectores calculados en local.
+      CREATE TABLE kb_collections (
+        id           TEXT PRIMARY KEY,
+        name         TEXT NOT NULL,
+        confidential INTEGER NOT NULL DEFAULT 0, -- sus conversaciones nunca se guardan en disco
+        created_at   INTEGER NOT NULL,
+        updated_at   INTEGER NOT NULL
+      );
+
+      CREATE TABLE kb_folders (
+        id            TEXT PRIMARY KEY,
+        collection_id TEXT NOT NULL REFERENCES kb_collections (id) ON DELETE CASCADE,
+        path          TEXT NOT NULL,
+        added_at      INTEGER NOT NULL,
+        UNIQUE (collection_id, path)
+      );
+
+      CREATE TABLE kb_documents (
+        id            TEXT PRIMARY KEY,
+        collection_id TEXT NOT NULL REFERENCES kb_collections (id) ON DELETE CASCADE,
+        folder_id     TEXT NOT NULL REFERENCES kb_folders (id) ON DELETE CASCADE,
+        rel_path      TEXT NOT NULL,
+        size          INTEGER NOT NULL,
+        mtime_ms      INTEGER NOT NULL,
+        status        TEXT NOT NULL CHECK (status IN ('indexed', 'error')),
+        error         TEXT,
+        pages         INTEGER,
+        chunks        INTEGER NOT NULL DEFAULT 0,
+        embed_model   TEXT,
+        indexed_at    INTEGER NOT NULL,
+        UNIQUE (folder_id, rel_path)
+      );
+      CREATE INDEX idx_kb_documents_collection ON kb_documents (collection_id);
+
+      CREATE TABLE kb_chunks (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        document_id TEXT NOT NULL REFERENCES kb_documents (id) ON DELETE CASCADE,
+        ord         INTEGER NOT NULL,
+        page        INTEGER,
+        section     TEXT,
+        text        TEXT NOT NULL,
+        embedding   BLOB NOT NULL -- Float32 normalizado
+      );
+      CREATE INDEX idx_kb_chunks_document ON kb_chunks (document_id, ord);
+
+      -- Búsqueda por palabras (BM25). Se mantiene a mano con el mismo rowid que kb_chunks.
+      CREATE VIRTUAL TABLE kb_chunks_fts USING fts5 (text, tokenize = 'unicode61 remove_diacritics 2');
+
+      CREATE TABLE assistant_conversations (
+        id               TEXT PRIMARY KEY,
+        title            TEXT NOT NULL,
+        collections_json TEXT NOT NULL DEFAULT '[]',
+        created_at       INTEGER NOT NULL,
+        updated_at       INTEGER NOT NULL
+      );
+      CREATE INDEX idx_assistant_conversations_recent ON assistant_conversations (updated_at DESC);
+
+      CREATE TABLE assistant_messages (
+        id              TEXT PRIMARY KEY,
+        conversation_id TEXT NOT NULL REFERENCES assistant_conversations (id) ON DELETE CASCADE,
+        role            TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+        blocks_json     TEXT NOT NULL,
+        model           TEXT,
+        metrics_json    TEXT,
+        created_at      INTEGER NOT NULL
+      );
+      CREATE INDEX idx_assistant_messages_conversation ON assistant_messages (conversation_id, created_at);
+    `,
+  },
 ]

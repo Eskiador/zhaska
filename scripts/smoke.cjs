@@ -268,6 +268,19 @@ app.on('browser-window-created', (_e, win) => {
       const gone = await invoke('attachments.get', { ids: [md.data.id] })
       check('quitar un adjunto antes de enviarlo', gone.ok && gone.data.length === 0)
 
+      step('probando las bases de conocimiento')
+      // ── Fase 12: carpetas sensibles y bases confidenciales (sin necesidad de Ollama) ──
+      const kb0 = await invoke('kb.create', { name: 'Sensible', confidential: true })
+      const kbS = kb0.ok ? kb0.data.find((c) => c.name === 'Sensible').id : null
+      nextPick = os.homedir()
+      const homeKb = await invoke('kb.addFolder', { id: kbS })
+      nextPick = null
+      check('una base de conocimiento no puede leer la carpeta personal completa', !homeKb.ok && homeKb.error.code === 'FORBIDDEN_PATH', homeKb.ok ? '' : homeKb.error.message)
+      const pc = await invoke('assistant.create', { collectionIds: [kbS], private: false })
+      check('una base confidencial solo se usa en conversaciones privadas', pc.ok && pc.data.private === true)
+      await invoke('assistant.delete', { id: pc.data.id })
+      await invoke('kb.delete', { id: kbS })
+
       step('probando Ollama y el chat')
       // ── Ollama y chat real (solo si hay un servidor y un modelo en este equipo) ──
       const st = await invoke('ollama.status')
@@ -276,7 +289,7 @@ app.on('browser-window-created', (_e, win) => {
       check('detección de hardware', hw.ok && hw.data.ramGB > 1, hw.ok ? `${hw.data.accel} · ${hw.data.gpu ?? 'sin GPU'} · ${Math.round(hw.data.ramGB)} GB` : '')
       if (st.ok && st.data.status.state === 'connected') {
         const models = await invoke('models.list')
-        const model = process.env.ZHASKA_SMOKE_MODEL || (models.ok && models.data[0]?.name)
+        const model = process.env.ZHASKA_SMOKE_MODEL || (models.ok && models.data.find((m) => !(m.capabilities.includes('embedding') && !m.capabilities.includes('completion')))?.name)
         if (!model) skip('chat con el modelo', 'no hay modelos descargados')
         else {
           await js(`window.__chat = []; window.zhaska.on('chat.event', (e) => window.__chat.push(e)); true`)
@@ -293,6 +306,52 @@ app.on('browser-window-created', (_e, win) => {
           check('respuesta en streaming del modelo real', done?.type === 'done' && deltas > 0, done ? `${deltas} fragmentos · ${done.metrics?.tokensPerSec?.toFixed(1)} tok/s` : 'sin respuesta en 120 s')
           const stored = await invoke('messages.list', { conversationId: conv2.data.id })
           check('respuesta guardada con métricas y título automático', stored.ok && stored.data.length === 2 && !!stored.data[1].metrics && (await invoke('conversations.list', { projectId: pid })).data.some((c) => c.title.startsWith('Responde solo')))
+
+          step('probando el asistente de oficina')
+          // ── Fase 12: base de conocimiento real + pregunta al modelo con fuentes ──
+          if (!models.data.some((m) => m.name.startsWith('embeddinggemma'))) skip('asistente con documentos', 'falta el modelo de búsqueda embeddinggemma')
+          else {
+            const kbDir = path.join(tmp, 'documentos-empresa')
+            fs.mkdirSync(kbDir, { recursive: true })
+            fs.writeFileSync(path.join(kbDir, 'procedimiento-pagos.txt'), 'Procedimiento de pagos de Quesos del Prado S.L.\n\nEl plazo de pago a proveedores nacionales es de 60 días desde la fecha de factura. Los pagos se emiten los días 10 y 25 de cada mes.')
+            fs.writeFileSync(path.join(kbDir, 'tarifas.csv'), 'producto;precio\nManchego curado;12,50\nQueso fresco;4,20')
+            const kb = await invoke('kb.create', { name: 'Documentos de prueba', confidential: false })
+            const kbId = kb.data.find((c) => c.name === 'Documentos de prueba').id
+            nextPick = kbDir
+            const added = await invoke('kb.addFolder', { id: kbId })
+            nextPick = null
+            let col = null
+            for (let i = 0; i < 600; i++) {
+              await wait(200)
+              col = (await invoke('kb.list')).data.find((c) => c.id === kbId)
+              if (col && !col.indexing && col.documents + col.errors >= 2) break
+            }
+            check('base de conocimiento: carpeta elegida e indexada en local', added.ok && col?.documents === 2 && col.errors === 0, col ? `${col.documents} documentos · ${col.chunks} fragmentos` : added.ok ? '' : added.error.message)
+            await js(`window.__asst = []; window.zhaska.on('assistant.event', (e) => window.__asst.push(e)); true`)
+            const ac = await invoke('assistant.create', { collectionIds: [kbId], private: false })
+            const asent = await invoke('assistant.send', { conversationId: ac.data.id, text: '¿Cuál es el plazo de pago a proveedores nacionales?', model })
+            let adone = null
+            for (let i = 0; i < 800 && !adone && asent.ok; i++) {
+              await wait(300)
+              adone = await js(`window.__asst.find((e) => e.taskId === ${JSON.stringify(asent.ok ? asent.data.taskId : '')} && ['done', 'error', 'cancelled'].includes(e.type)) || null`)
+            }
+            const ablocks = adone?.message?.blocks ?? []
+            const answer = ablocks.find((b) => b.kind === 'text')?.text ?? ''
+            const src = ablocks.find((b) => b.kind === 'sources')?.items ?? []
+            check('el asistente responde con el dato y cita el documento', adone?.type === 'done' && /60/.test(answer) && src.some((x) => x.cited && x.name === 'procedimiento-pagos.txt'), (answer || adone?.error || 'sin respuesta').slice(0, 100).replace(/\n/g, ' '))
+            const mode = (label) => `[...document.querySelectorAll('button')].find((b) => b.textContent.trim() === ${JSON.stringify(label)})?.click(); true`
+            await js(mode('Chat'))
+            await wait(2000)
+            check('la vista del asistente muestra la respuesta y sus fuentes', await js(`/fuentes/i.test(document.body.innerText) && document.body.innerText.includes('procedimiento-pagos.txt')`))
+            if (process.env.ZHASKA_SMOKE_ASSISTANT_SHOT) {
+              win.webContents.invalidate()
+              await wait(600)
+            }
+            if (process.env.ZHASKA_SMOKE_ASSISTANT_SHOT) fs.writeFileSync(process.env.ZHASKA_SMOKE_ASSISTANT_SHOT, (await within(win.webContents.capturePage(), 10_000, 'captura')).toPNG())
+            await js(mode('Código'))
+            await wait(500)
+            check('el selector Chat / Código vuelve a la vista de programación', await js(`!!document.querySelector('[data-steps], .monaco-editor') || document.body.innerText.includes('Nueva conversación')`))
+          }
 
           step('probando detener una respuesta')
           // Detener una respuesta a mitad

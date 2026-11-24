@@ -206,7 +206,7 @@ function MetricsLine({ model, metrics }: { model?: string; metrics: NonNullable<
   )
 }
 
-function ErrorBlock({ code, message }: { code: string; message: string }) {
+export function ErrorBlock({ code, message }: { code: string; message: string }) {
   const start = useOllama((s) => s.start)
   return (
     <div className="mt-2 flex items-start gap-2.5 rounded-lg border border-err/35 bg-err-soft px-3 py-2.5 text-small">
