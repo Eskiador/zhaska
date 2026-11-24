@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZHASKA — Maqueta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-0:#0A0C11;--bg-1:#0F1218;--bg-2:#151922;--bg-3:#1C212C;--bg-4:#242A37;
+  --border:#1F2430;--border-strong:#2C3342;
+  --text-1:#E6E8EE;--text-2:#A0A7B8;--text-3:#6C7386;
+  --accent:#4F7DFF;--accent-soft:rgb(79 125 255/.14);
+  --agent:#9381FF;--agent-soft:rgb(147 129 255/.14);
+  --success:#3DBE84;--success-soft:rgb(61 190 132/.14);
+  --error:#F0616D;--error-soft:rgb(240 97 109/.14);
+  --warning:#E7B55B;--warning-soft:rgb(231 181 91/.12);
+  --radius-sm:4px;--radius:6px;--radius-lg:10px;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg-0);color:var(--text-1);font:13px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{min-width:1280px;overflow:hidden}
+svg.lucide{width:15px;height:15px;stroke-width:1.75;flex:none}
+.mono{font-family:var(--mono);font-size:12px}
+.muted{color:var(--text-2)}.dim{color:var(--text-3)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;white-space:nowrap}
+.app{display:grid;grid-template-rows:36px 1fr 24px;height:100vh}
+
+/* Title bar */
+.titlebar{display:flex;align-items:center;gap:12px;padding:0 0 0 12px;border-bottom:1px solid var(--border);background:var(--bg-0)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:600;letter-spacing:.01em}
+.logo-mark{width:18px;height:18px;border-radius:5px;background:linear-gradient(135deg,#5B86FF,#3A5BD9);position:relative;box-shadow:inset 0 0 0 1px rgb(255 255 255/.12)}
+.logo-mark::after{content:"";position:absolute;inset:5px;border-radius:2px;border:1.5px solid rgb(255 255 255/.9);border-right-color:transparent}
+.crumb{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:var(--radius);color:var(--text-2)}
+.crumb:hover{background:var(--bg-2)}
+.crumb b{color:var(--text-1);font-weight:500}
+.search{margin:0 auto;width:420px;height:24px;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-3);font-size:12px}
+.search kbd{margin-left:auto}
+kbd{font:500 10.5px var(--mono);color:var(--text-3);border:1px solid var(--border-strong);border-radius:3px;padding:0 4px}
+.model-pill{display:flex;align-items:center;gap:8px;padding:3px 10px;border:1px solid var(--border);border-radius:999px;background:var(--bg-1);font-size:12px;color:var(--text-2)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px var(--success-soft)}
+.winctl{display:flex;height:100%}
+.winctl span{width:46px;display:grid;place-items:center;color:var(--text-2)}
+.demo-badge{font:600 10px Inter;letter-spacing:.08em;color:var(--warning);background:var(--warning-soft);border:1px solid rgb(231 181 91/.3);padding:2px 7px;border-radius:4px}
+
+/* Main grid */
+.main{display:grid;grid-template-columns:240px minmax(420px,1fr) 312px minmax(460px,1.15fr);min-height:0}
+.panel{background:var(--bg-1);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0;min-width:0}
+.panel-h{height:36px;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--border);flex:none}
+.panel-h .t{font-weight:600}
+.panel-h .actions{margin-left:auto;display:flex;gap:2px}
+.icon-btn{width:24px;height:24px;display:grid;place-items:center;border-radius:var(--radius-sm);color:var(--text-2)}
+.icon-btn:hover{background:var(--bg-3);color:var(--text-1)}
+.sec-label{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);padding:14px 12px 6px;display:flex;align-items:center;justify-content:space-between}
+
+/* Sidebar */
+.side{background:var(--bg-0)}
+.side .row{display:flex;align-items:center;gap:8px;height:28px;padding:0 12px;margin:0 6px;border-radius:var(--radius);color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side .row:hover{background:var(--bg-2);color:var(--text-1)}
+.side .row.active{background:var(--bg-3);color:var(--text-1)}
+.side .row .meta{margin-left:auto;font-size:11px;color:var(--text-3)}
+.btn-row{display:flex;gap:6px;padding:10px 12px 2px}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--bg-2);color:var(--text-1);font-weight:500;font-size:12.5px}
+.btn:hover{background:var(--bg-3)}
+.btn.primary{background:var(--accent);border-color:transparent;color:#fff}
+.btn.ghost{background:none;border-color:transparent;color:var(--text-2)}
+.btn.sm{height:24px;padding:0 8px;font-size:12px}
+.btn-row .btn{flex:1;justify-content:center}
+.tree{padding:0 6px;font-size:12.5px}
+.tree .n{display:flex;align-items:center;gap:6px;height:24px;padding-right:8px;border-radius:var(--radius-sm);color:var(--text-2)}
+.tree .n:hover{background:var(--bg-2)}
+.tree .n.sel{background:var(--accent-soft);color:var(--text-1)}
+.tree .n .mod{margin-left:auto;width:6px;height:6px;border-radius:50%}
+.mod.agent{background:var(--agent)}.mod.user{background:var(--accent)}
+.tree .n svg{width:14px;height:14px}
+.side-foot{margin-top:auto;border-top:1px solid var(--border);padding:6px 0}
+
+/* Chat */
+.chat{background:var(--bg-1)}
+.chat-scroll{flex:1;overflow:auto;padding:20px 24px 12px;display:flex;flex-direction:column;gap:18px}
+.msg-user{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;color:var(--text-1)}
+.msg-user .att-inline{display:flex;gap:6px;margin-top:8px}
+.who{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-3);margin-bottom:6px}
+.who b{color:var(--text-2);font-weight:500}
+.avatar{width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font-size:10px;font-weight:600}
+.avatar.me{background:var(--bg-4);color:var(--text-2)}
+.avatar.ai{background:var(--agent-soft);color:var(--agent)}
+.msg-ai{padding-left:12px;border-left:2px solid transparent}
+.msg-ai.live{border-left-color:var(--agent)}
+.msg-ai p{color:var(--text-1);margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:var(--radius);background:var(--bg-2);border:1px solid var(--border);color:var(--text-2);font-size:12px}
+.chip .mono{font-size:11.5px;color:var(--text-1)}
+.chip svg{width:13px;height:13px}
+.chip.ok svg{color:var(--success)}
+.chip.run{border-color:rgb(147 129 255/.35);background:var(--agent-soft)}
+.chip.run svg{color:var(--agent)}
+.code{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-0);margin:4px 0 10px}
+.code-h{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-3)}
+.code-h .actions{margin-left:auto;display:flex;gap:2px}
+.code pre{padding:10px 12px;font:12px/1.6 var(--mono);color:var(--text-2);overflow:hidden}
+.k{color:#C49BFF}.s{color:#8FD19E}.f{color:#7FB2FF}.c{color:var(--text-3)}.t{color:#E7C07B}.p{color:#E6E8EE}
+.changes{border:1px solid var(--border-strong);border-radius:var(--radius-lg);background:var(--bg-2);overflow:hidden}
+.changes-h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border)}
+.changes-h .t{font-weight:600}
+.changes-row{display:flex;align-items:center;gap:8px;padding:6px 12px;font-size:12.5px}
+.changes-row:hover{background:var(--bg-3)}
+.badge{font:500 10.5px var(--mono);padding:1px 5px;border-radius:3px}
+.badge.new{color:var(--success);background:var(--success-soft)}
+.badge.mod{color:var(--accent);background:var(--accent-soft)}
+.add{color:var(--success)}.del{color:var(--error)}
+.changes-f{display:flex;gap:6px;justify-content:flex-end;padding:8px 12px;border-top:1px solid var(--border)}
+.typing{display:inline-flex;gap:3px;vertical-align:middle;margin-left:4px}
+.typing i{width:4px;height:4px;border-radius:50%;background:var(--agent);animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+
+/* Composer */
+.composer{margin:0 16px 16px;border:1px solid var(--border-strong);border-radius:var(--radius-lg);background:var(--bg-2);box-shadow:0 0 0 4px rgb(0 0 0/.15)}
+.att-row{display:flex;gap:8px;padding:10px 10px 0;flex-wrap:wrap}
+.att{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-1);min-width:0;max-width:220px}
+.att-ic{width:28px;height:28px;border-radius:5px;display:grid;place-items:center;flex:none}
+.att-ic.pdf{background:rgb(240 97 109/.12);color:#F48C95}
+.att-ic.xls{background:rgb(61 190 132/.12);color:#6BD3A3}
+.att-thumb{width:28px;height:28px;border-radius:5px;flex:none;background:linear-gradient(160deg,#2a3550,#1a1f2e);position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px var(--border-strong)}
+.att-thumb::before{content:"";position:absolute;left:4px;right:4px;top:5px;height:4px;border-radius:2px;background:#4F7DFF88}
+.att-thumb::after{content:"";position:absolute;left:4px;top:12px;width:9px;height:11px;border-radius:2px;background:#9381FF66;box-shadow:11px 0 0 #3DBE8455}
+.att .nm{font-size:12px;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.att .sz{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:4px}
+.att .x{color:var(--text-3);margin-left:2px}
+.bar{height:2px;width:46px;background:var(--bg-4);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:62%;background:var(--accent)}
+.input{padding:10px 12px;min-height:52px;color:var(--text-1)}
+.input .ref{font-family:var(--mono);font-size:12px;color:var(--accent);background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+.input .caret{display:inline-block;width:1.5px;height:15px;background:var(--text-1);vertical-align:-3px;animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.comp-f{display:flex;align-items:center;gap:4px;padding:6px 8px;border-top:1px solid var(--border)}
+.sel{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:var(--radius);color:var(--text-2);font-size:12px}
+.sel:hover{background:var(--bg-3)}
+.stop{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:var(--radius);background:var(--bg-4);border:1px solid var(--border-strong);font-weight:500;font-size:12.5px}
+.stop i{width:8px;height:8px;border-radius:2px;background:var(--text-1)}
+
+/* Activity */
+.act{background:var(--bg-0)}
+.model-state{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px}
+.spin{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--agent-soft);border-top-color:var(--agent);animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.model-state .tps{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--text-2)}
+.approval{margin:10px 10px 4px;border:1px solid rgb(231 181 91/.45);background:linear-gradient(var(--warning-soft),var(--warning-soft)),var(--bg-1);border-radius:var(--radius-lg);padding:10px}
+.approval .h{display:flex;align-items:center;gap:6px;font-weight:600;font-size:12.5px;color:var(--warning)}
+.approval .cmd{margin:8px 0;padding:7px 9px;background:var(--bg-0);border:1px solid var(--border);border-radius:var(--radius);font:12px var(--mono);color:var(--text-1)}
+.approval .cmd span{color:var(--text-3)}
+.approval .why{font-size:11.5px;color:var(--text-2);margin-bottom:8px}
+.approval .b{display:flex;gap:6px}
+.approval .b .btn{flex:1;justify-content:center;height:26px;font-size:12px}
+.phases{flex:1;overflow:auto;padding:2px 0 12px}
+.phase-h{display:flex;align-items:center;gap:6px;padding:14px 14px 6px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.phase-h .cnt{margin-left:auto;font:500 11px var(--mono);letter-spacing:0;text-transform:none}
+.phase-h.on{color:var(--agent)}
+.step{position:relative;display:grid;grid-template-columns:16px 1fr auto;gap:8px;align-items:start;padding:5px 14px;font-size:12.5px}
+.step:hover{background:var(--bg-1)}
+.st{width:14px;height:14px;margin-top:2px;border-radius:50%;display:grid;place-items:center}
+.st.done{background:var(--success-soft);color:var(--success)}
+.st.done svg,.st.fail svg{width:10px;height:10px;stroke-width:3}
+.st.fail{background:var(--error-soft);color:var(--error)}
+.st.pend{border:1.5px solid var(--border-strong)}
+.step .ti{color:var(--text-2);min-width:0}
+.step.running .ti{color:var(--text-1)}
+.step .tg{display:block;font:11.5px var(--mono);color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step.running .tg{color:var(--agent)}
+.step.failed .tg{color:var(--error)}
+.step .du{font:11px var(--mono);color:var(--text-3);margin-top:2px}
+.step .df{font:11px var(--mono)}
+.step.running::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--agent),transparent);background-size:50% 100%;background-repeat:no-repeat;animation:sweep 1.4s var(--ease) infinite}
+@keyframes sweep{from{background-position:-50% 0}to{background-position:150% 0}}
+.out{margin:4px 14px 4px 38px;padding:6px 8px;border-radius:var(--radius);background:var(--bg-1);border:1px solid var(--border);font:11px/1.55 var(--mono);color:var(--text-3)}
+.out .e{color:var(--error)}
+.act-foot{border-top:1px solid var(--border);padding:8px 12px;display:flex;gap:14px;font:11px var(--mono);color:var(--text-3)}
+.act-foot b{color:var(--text-2);font-weight:500}
+
+/* Editor */
+.ed{border-right:0;display:grid;grid-template-rows:36px 1fr 214px}
+.tabs{display:flex;align-items:stretch;border-bottom:1px solid var(--border);background:var(--bg-0)}
+.tab{display:flex;align-items:center;gap:7px;padding:0 12px;border-right:1px solid var(--border);color:var(--text-3);font-size:12.5px;white-space:nowrap}
+.tab.on{background:var(--bg-1);color:var(--text-1);box-shadow:inset 0 1px 0 var(--accent)}
+.tab .mod{width:6px;height:6px;border-radius:50%}
+.tab svg{width:14px;height:14px}
+.tabs .right{margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 8px}
+.diffbtn{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:var(--radius);background:var(--agent-soft);color:var(--agent);font-size:12px;font-weight:500}
+.editor{overflow:hidden;font:12.5px/20px var(--mono);background:var(--bg-1);position:relative}
+.crumbs{height:26px;display:flex;align-items:center;gap:4px;padding:0 14px;font:11.5px Inter;color:var(--text-3);border-bottom:1px solid var(--border)}
+.crumbs svg{width:12px;height:12px}
+.lines{display:grid;grid-template-columns:46px 4px 1fr}
+.ln{color:var(--text-3);text-align:right;padding-right:10px;opacity:.7}
+.gut.a{background:var(--success)}.gut.m{background:var(--accent)}
+.lc{padding-left:14px;white-space:pre;color:var(--text-2)}
+.lc.add{background:var(--diff-add,rgb(61 190 132/.10))}
+.lc .cur{display:inline-block;width:2px;height:16px;background:var(--agent);vertical-align:-3px;animation:caret 1s steps(1) infinite}
+.minimap{position:absolute;right:0;top:26px;bottom:0;width:60px;border-left:1px solid var(--border);background:repeating-linear-gradient(180deg,transparent 0 3px,rgb(160 167 184/.08) 3px 5px);opacity:.8}
+.minimap::after{content:"";position:absolute;left:0;right:0;top:20px;height:90px;background:rgb(255 255 255/.04)}
+
+/* Terminal */
+.term{border-top:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg-0);min-height:0}
+.term .tabs{background:var(--bg-0)}
+.term .tab{height:30px}
+.term-body{flex:1;padding:8px 14px;font:12px/1.6 var(--mono);color:var(--text-2);overflow:hidden}
+.pr{color:var(--accent)}.ok{color:var(--success)}.wa{color:var(--warning)}
+
+/* Status bar */
+.status{display:flex;align-items:center;gap:14px;padding:0 10px;border-top:1px solid var(--border);background:var(--bg-0);font-size:11.5px;color:var(--text-3)}
+.status span{display:inline-flex;align-items:center;gap:5px}
+.status svg{width:12px;height:12px}
+.status .r{margin-left:auto}
+.perm{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TITLE BAR -->
+  <header class="titlebar">
+    <div class="logo"><div class="logo-mark"></div>ZHASKA</div>
+    <div class="crumb"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg><b>tienda-analytics</b><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+    <span class="demo-badge">MAQUETA · DATOS SIMULADOS</span>
+    <div class="search"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Buscar archivos, comandos, conversaciones<kbd>Ctrl K</kbd></div>
+    <div class="model-pill"><span class="dot"></span>gemma4:12b-it-qat<span class="dim">·</span>GPU 91 %</div>
+    <div class="winctl"><span><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg></span><span><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/></svg></span><span><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></div>
+  </header>
+
+  <div class="main">
+
+    <!-- SIDEBAR -->
+    <aside class="panel side">
+      <div class="btn-row">
+        <button class="btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v6"/><path d="M9 10h6"/></svg>Chat</button>
+        <button class="btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>Proyecto</button>
+      </div>
+
+      <div class="sec-label">Conversaciones<svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></div>
+      <div class="row active"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Panel de ventas con gráficos<span class="meta">ahora</span></div>
+      <div class="row"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Arreglar login con JWT<span class="meta">2 h</span></div>
+      <div class="row"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Migrar a Tailwind 4<span class="meta">ayer</span></div>
+
+      <div class="sec-label">Explorador<span style="display:flex;gap:2px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg></span></div>
+      <div class="tree">
+        <div class="n" style="padding-left:6px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>src</div>
+        <div class="n" style="padding-left:20px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>components</div>
+        <div class="n sel" style="padding-left:48px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:#7FB2FF"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>Dashboard.tsx<span class="mod agent"></span></div>
+        <div class="n" style="padding-left:48px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:#7FB2FF"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>SalesChart.tsx<span class="mod agent"></span></div>
+        <div class="n" style="padding-left:48px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:#7FB2FF"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>Header.tsx</div>
+        <div class="n" style="padding-left:20px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>hooks</div>
+        <div class="n" style="padding-left:34px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:#7FB2FF"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>App.tsx<span class="mod agent"></span></div>
+        <div class="n" style="padding-left:34px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:#E7C07B"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>main.tsx</div>
+        <div class="n" style="padding-left:6px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>public</div>
+        <div class="n" style="padding-left:20px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:#E7C07B"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"/></svg>package.json<span class="mod agent"></span></div>
+        <div class="n" style="padding-left:20px"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>README.md</div>
+      </div>
+
+      <div class="sec-label">Recientes</div>
+      <div class="row"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>portfolio-web<span class="meta">3 d</span></div>
+      <div class="row"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>scraper-precios<span class="meta">1 sem</span></div>
+
+      <div class="side-foot">
+        <div class="row"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13.234 20.252 21 12.3"/><path d="m16 6-8.414 8.586a2 2 0 0 0 0 2.828 2 2 0 0 0 2.828 0l8.414-8.586a4 4 0 0 0 0-5.656 4 4 0 0 0-5.656 0l-8.415 8.585a6 6 0 1 0 8.486 8.486"/></svg>Adjuntos<span class="meta">3</span></div>
+        <div class="row"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85"/><path d="m7 16.5 5-3"/><path d="M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3"/><path d="m17 16.5 4.74-2.85"/><path d="M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15"/><path d="m12 8 4.74-2.85"/><path d="M12 13.5V8"/></svg>Modelos</div>
+        <div class="row"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>Configuración</div>
+      </div>
+    </aside>
+
+    <!-- CHAT -->
+    <section class="panel chat">
+      <div class="panel-h"><span class="t">Panel de ventas con gráficos</span><span class="dim" style="font-size:12px">· tienda-analytics</span>
+        <div class="actions"><button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg></button><button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div>
+      </div>
+      <div class="chat-scroll">
+        <div>
+          <div class="who"><span class="avatar me">P</span><b>Tú</b>· 18:42</div>
+          <div class="msg-user">Crea un dashboard de ventas mensuales con un gráfico de barras usando los datos del Excel adjunto. Usa el estilo de <span class="mono" style="color:var(--accent)">@Header.tsx</span>.
+            <div class="att-inline">
+              <span class="chip"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:#6BD3A3"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg><span class="mono">ventas_2026.xlsx</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="msg-ai live">
+          <div class="who"><span class="avatar ai"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><b>ZHASKA</b>· gemma4:12b</div>
+          <p>He revisado la estructura del proyecto y el Excel (12 meses × 4 categorías). Voy a crear el componente del gráfico, integrarlo en el dashboard y añadir <span class="mono">recharts</span>.</p>
+          <div class="chips">
+            <span class="chip ok"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Leído <span class="mono">package.json</span></span>
+            <span class="chip ok"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Leído <span class="mono">Header.tsx</span></span>
+            <span class="chip ok"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Analizado <span class="mono">ventas_2026.xlsx</span></span>
+            <span class="chip ok"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Creado <span class="mono">SalesChart.tsx</span></span>
+            <span class="chip run"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>Esperando aprobación <span class="mono">npm install</span></span>
+          </div>
+          <div class="code">
+            <div class="code-h"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg><span class="mono">src/components/SalesChart.tsx</span><div class="actions"><button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button><button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></button></div></div>
+<pre><span class="k">export function</span> <span class="f">SalesChart</span><span class="p">({ data }: </span><span class="t">Props</span><span class="p">) {</span>
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="t">ResponsiveContainer</span> <span class="f">height</span><span class="p">={</span><span class="s">280</span><span class="p">}&gt;</span>
+      <span class="p">&lt;</span><span class="t">BarChart</span> <span class="f">data</span><span class="p">={data}&gt;</span>  <span class="c">// meses × categoría</span></pre>
+          </div>
+          <p class="muted">Necesito instalar una dependencia para continuar<span class="typing"><i></i><i></i><i></i></span></p>
+        </div>
+
+        <div class="changes">
+          <div class="changes-h"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:var(--agent)"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M18 6V5"/><path d="M18 11v-1"/><line x1="6" x2="6" y1="9" y2="21"/></svg><span class="t">Cambios de esta tarea</span><span class="dim" style="font-size:12px">· 4 archivos</span><span style="margin-left:auto" class="mono"><span class="add">+128</span> <span class="del">−9</span></span></div>
+          <div class="changes-row"><span class="badge new">A</span><span class="mono">src/components/SalesChart.tsx</span><span style="margin-left:auto" class="mono add">+74</span></div>
+          <div class="changes-row"><span class="badge mod">M</span><span class="mono">src/components/Dashboard.tsx</span><span style="margin-left:auto" class="mono"><span class="add">+41</span> <span class="del">−6</span></span></div>
+          <div class="changes-row"><span class="badge mod">M</span><span class="mono">src/App.tsx</span><span style="margin-left:auto" class="mono"><span class="add">+12</span> <span class="del">−3</span></span></div>
+          <div class="changes-row"><span class="badge mod">M</span><span class="mono">package.json</span><span style="margin-left:auto" class="mono add">+1</span></div>
+          <div class="changes-f"><button class="btn ghost sm"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>Rechazar todo</button><button class="btn sm"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>Ver diff</button><button class="btn primary sm"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Aceptar todo</button></div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <div class="att-row">
+          <div class="att"><div class="att-ic pdf"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></div><div style="min-width:0"><div class="nm">requisitos-cliente.pdf</div><div class="sz">PDF · 1,2 MB · <span style="color:var(--success)">Listo</span></div></div><button class="x"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+          <div class="att"><div class="att-thumb"></div><div style="min-width:0"><div class="nm">boceto-dashboard.png</div><div class="sz">PNG · 340 KB · <span class="bar"><i></i></span></div></div><button class="x"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+        </div>
+        <div class="input">Después añade un filtro por categoría usando <span class="ref">@Dashboard.tsx</span><span class="caret"></span></div>
+        <div class="comp-f">
+          <button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13.234 20.252 21 12.3"/><path d="m16 6-8.414 8.586a2 2 0 0 0 0 2.828 2 2 0 0 0 2.828 0l8.414-8.586a4 4 0 0 0 0-5.656 4 4 0 0 0-5.656 0l-8.415 8.585a6 6 0 1 0 8.486 8.486"/></svg></button>
+          <button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg></button>
+          <span class="sel"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>gemma4:12b<svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><path d="m6 9 6 6 6-6"/></svg></span>
+          <span class="sel"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--accent)"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Preguntar<svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><path d="m6 9 6 6 6-6"/></svg></span>
+          <button class="stop"><i></i>Detener</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIVITY -->
+    <section class="panel act">
+      <div class="panel-h"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:var(--agent)"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg><span class="t">Actividad</span><span class="dim" style="font-size:12px">· 1 m 48 s</span>
+        <div class="actions"><button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg></button><button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/><path d="m8 9 3 3-3 3"/></svg></button></div>
+      </div>
+      <div class="model-state"><span class="spin"></span><span>Esperando tu aprobación</span><span class="tps">31,4 tok/s</span></div>
+
+      <div class="approval">
+        <div class="h"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Permiso para ejecutar comando</div>
+        <div class="cmd"><span>&gt;</span> npm install recharts@3</div>
+        <div class="why">Instala 1 paquete en <span class="mono">tienda-analytics/</span>. Modifica package.json y package-lock.json.</div>
+        <div class="b"><button class="btn ghost">Denegar</button><button class="btn">Siempre aquí</button><button class="btn primary">Permitir</button></div>
+      </div>
+
+      <div class="phases">
+        <div class="phase-h">Análisis<span class="cnt">4/4 · 9 s</span></div>
+        <div class="step"><span class="st done"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ti">Estructura del proyecto<span class="tg">get_project_structure · 42 archivos</span></span><span class="du">0,2 s</span></div>
+        <div class="step"><span class="st done"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ti">Leído configuración<span class="tg">package.json · tsconfig.json</span></span><span class="du">0,1 s</span></div>
+        <div class="step"><span class="st done"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ti">Leído archivo<span class="tg">src/components/Header.tsx</span></span><span class="du">0,1 s</span></div>
+        <div class="step"><span class="st done"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ti">Analizado adjunto<span class="tg">ventas_2026.xlsx · 2 hojas</span></span><span class="du">1,4 s</span></div>
+
+        <div class="phase-h">Planificación<span class="cnt">1/1</span></div>
+        <div class="step"><span class="st done"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ti">Plan de 5 pasos<span class="tg">update_plan</span></span><span class="du">6,8 s</span></div>
+
+        <div class="phase-h on">Ejecución<span class="cnt">3/5</span></div>
+        <div class="step"><span class="st done"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ti">Creado archivo<span class="tg">src/components/SalesChart.tsx</span></span><span class="df add">+74</span></div>
+        <div class="step"><span class="st done"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ti">Editado archivo<span class="tg">src/components/Dashboard.tsx</span></span><span class="df"><span class="add">+41</span> <span class="del">−6</span></span></div>
+        <div class="step"><span class="st done"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ti">Editado archivo<span class="tg">src/App.tsx</span></span><span class="df"><span class="add">+12</span> <span class="del">−3</span></span></div>
+        <div class="step running"><span class="spin" style="margin-top:2px"></span><span class="ti">Instalar dependencias<span class="tg">npm install recharts@3</span></span><span class="du">—</span></div>
+        <div class="step"><span class="st pend"></span><span class="ti">Conectar datos del Excel<span class="tg">src/data/ventas.ts</span></span><span class="du"></span></div>
+
+        <div class="phase-h">Verificación<span class="cnt">1/3</span></div>
+        <div class="step failed"><span class="st fail"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span><span class="ti">Comprobación de tipos<span class="tg">tsc --noEmit · 1 error</span></span><span class="du">3,2 s</span></div>
+        <div class="out"><span class="e">TS2307</span> Cannot find module 'recharts'<br><span class="dim">src/components/SalesChart.tsx:1:38</span></div>
+        <div class="step"><span class="st pend"></span><span class="ti">Ejecutar pruebas<span class="tg">npm test</span></span><span class="du"></span></div>
+        <div class="step"><span class="st pend"></span><span class="ti">Compilar proyecto<span class="tg">npm run build</span></span><span class="du"></span></div>
+      </div>
+      <div class="act-foot"><span>pasos <b>10</b></span><span>tokens <b>18,2K</b></span><span>ctx <b>41 %</b></span></div>
+    </section>
+
+    <!-- EDITOR + TERMINAL -->
+    <section class="panel ed">
+      <div class="tabs">
+        <div class="tab on"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:#7FB2FF"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>Dashboard.tsx<span class="mod" style="background:var(--agent)"></span></div>
+        <div class="tab"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:#7FB2FF"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>SalesChart.tsx</div>
+        <div class="tab"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:#E7C07B"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"/></svg>package.json</div>
+        <div class="right"><span class="diffbtn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>Diff pendiente</span><button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/></svg></button></div>
+      </div>
+      <div class="editor">
+        <div class="crumbs">src<svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>components<svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>Dashboard.tsx<svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg><span style="color:var(--text-2)">Dashboard</span></div>
+        <div class="lines">
+<span class="ln">1</span><span class="gut"></span><span class="lc"><span class="k">import</span> <span class="p">{ useMemo, useState }</span> <span class="k">from</span> <span class="s">'react'</span></span>
+<span class="ln">2</span><span class="gut"></span><span class="lc"><span class="k">import</span> <span class="p">{ Header }</span> <span class="k">from</span> <span class="s">'./Header'</span></span>
+<span class="ln">3</span><span class="gut a"></span><span class="lc add"><span class="k">import</span> <span class="p">{ SalesChart }</span> <span class="k">from</span> <span class="s">'./SalesChart'</span></span>
+<span class="ln">4</span><span class="gut a"></span><span class="lc add"><span class="k">import</span> <span class="p">{ ventas }</span> <span class="k">from</span> <span class="s">'../data/ventas'</span></span>
+<span class="ln">5</span><span class="gut"></span><span class="lc"> </span>
+<span class="ln">6</span><span class="gut"></span><span class="lc"><span class="k">export function</span> <span class="f">Dashboard</span><span class="p">() {</span></span>
+<span class="ln">7</span><span class="gut m"></span><span class="lc">  <span class="k">const</span> <span class="p">[range, setRange] =</span> <span class="f">useState</span><span class="p">&lt;</span><span class="t">Range</span><span class="p">&gt;(</span><span class="s">'12m'</span><span class="p">)</span></span>
+<span class="ln">8</span><span class="gut a"></span><span class="lc add">  <span class="k">const</span> <span class="p">data =</span> <span class="f">useMemo</span><span class="p">(() =&gt;</span> <span class="f">byMonth</span><span class="p">(ventas, range), [range])</span></span>
+<span class="ln">9</span><span class="gut"></span><span class="lc"> </span>
+<span class="ln">10</span><span class="gut"></span><span class="lc">  <span class="k">return</span> <span class="p">(</span></span>
+<span class="ln">11</span><span class="gut"></span><span class="lc">    <span class="p">&lt;</span><span class="t">main</span> <span class="f">className</span><span class="p">=</span><span class="s">"dashboard"</span><span class="p">&gt;</span></span>
+<span class="ln">12</span><span class="gut"></span><span class="lc">      <span class="p">&lt;</span><span class="t">Header</span> <span class="f">title</span><span class="p">=</span><span class="s">"Ventas"</span> <span class="p">/&gt;</span></span>
+<span class="ln">13</span><span class="gut a"></span><span class="lc add">      <span class="p">&lt;</span><span class="t">section</span> <span class="f">className</span><span class="p">=</span><span class="s">"card"</span><span class="p">&gt;</span></span>
+<span class="ln">14</span><span class="gut a"></span><span class="lc add">        <span class="p">&lt;</span><span class="t">RangePicker</span> <span class="f">value</span><span class="p">={range}</span> <span class="f">onChange</span><span class="p">={setRange} /&gt;</span></span>
+<span class="ln">15</span><span class="gut a"></span><span class="lc add">        <span class="p">&lt;</span><span class="t">SalesChart</span> <span class="f">data</span><span class="p">={data} /&gt;</span><span class="cur"></span></span>
+<span class="ln">16</span><span class="gut a"></span><span class="lc add">      <span class="p">&lt;/</span><span class="t">section</span><span class="p">&gt;</span></span>
+<span class="ln">17</span><span class="gut"></span><span class="lc">    <span class="p">&lt;/</span><span class="t">main</span><span class="p">&gt;</span></span>
+<span class="ln">18</span><span class="gut"></span><span class="lc">  <span class="p">)</span></span>
+<span class="ln">19</span><span class="gut"></span><span class="lc"><span class="p">}</span></span>
+        </div>
+        <div class="minimap"></div>
+      </div>
+      <div class="term">
+        <div class="tabs">
+          <div class="tab on"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:var(--agent)"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Agente</div>
+          <div class="tab"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>PowerShell</div>
+          <div class="tab"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>dev server</div>
+          <div class="right"><button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button><button class="icon-btn"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button></div>
+        </div>
+        <div class="term-body">
+          <div><span class="pr">tienda-analytics&gt;</span> npx tsc --noEmit</div>
+          <div><span style="color:var(--error)">src/components/SalesChart.tsx(1,38): error TS2307:</span> Cannot find module 'recharts'.</div>
+          <div class="dim">Found 1 error in src/components/SalesChart.tsx:1</div>
+          <div style="margin-top:6px"><span class="wa">⏸</span> <span class="dim">En espera de aprobación:</span> npm install recharts@3</div>
+          <div><span class="pr">tienda-analytics&gt;</span> <span class="caret" style="display:inline-block;width:7px;height:14px;background:var(--text-2);vertical-align:-2px;animation:caret 1s steps(1) infinite"></span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- STATUS BAR -->
+  <footer class="status">
+    <span><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>main</span>
+    <span><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:var(--error)"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>1</span>
+    <span><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:var(--warning)"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>0</span>
+    <span class="perm"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Modo: Preguntar</span>
+    <span class="r"><span class="dot" style="width:5px;height:5px"></span>Ollama 127.0.0.1</span>
+    <span><svg class="lucide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>gemma4:12b · VRAM 6,6/8 GB · RAM 1,1 GB</span>
+    <span>31,4 tok/s</span>
+    <span>TypeScript React · UTF-8 · CRLF</span>
+  </footer>
+</div>
+</body>
+</html>

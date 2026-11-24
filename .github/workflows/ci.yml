@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows es la plataforma objetivo; macOS es donde se desarrolla.
+        os: [windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      # Compila y arranca la app real (ventana, preload, IPC, SQLite, archivos, editor)
+      - run: npm run smoke
+      # Restaurar una copia, exportar e importar con tres arranques reales (Fase 9)
+      - run: node scripts/restore-e2e.cjs
+      # App empaquetada y actualización de 0.1.0 a 0.1.1 con un canal local (Fase 10)
+      - run: node scripts/update-e2e.mjs

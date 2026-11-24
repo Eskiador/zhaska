@@ -1,0 +1,95 @@
+# Empaquetado de ZHASKA (Fase 10) — electron-builder 26
+# Windows: instalador NSIS por usuario (sin administrador) en %LOCALAPPDATA%\Programs\ZHASKA.
+# Los datos del usuario viven en %APPDATA%\ZHASKA y el instalador/desinstalador nunca los toca.
+appId: com.zhaska.app
+productName: ZHASKA
+copyright: Copyright © 2026 ZHASKA
+directories:
+  output: dist
+  buildResources: build
+
+# Solo el código compilado y las dependencias de ejecución (la interfaz ya va empaquetada por Vite en out/renderer)
+files:
+  - out/**
+  - package.json
+  - "!**/*.{map,pdb,ts,tsx,md,markdown}"
+  - "!**/node_modules/**/{test,tests,__tests__,example,examples,docs,doc,.github}/**"
+  - "!**/node_modules/node-pty/{src,deps,third_party,scripts,binding.gyp}/**"
+  - "!**/node_modules/node-pty/binding.gyp"
+  # pdfjs: solo la versión «legacy» para Node, sus fuentes estándar y cmaps (no el visor web ni la versión moderna)
+  - "!**/node_modules/pdfjs-dist/{build,web,image_decoders}/**"
+  - "!**/node_modules/pdfjs-dist/legacy/{web,image_decoders}/**"
+  - "!**/node_modules/pdfjs-dist/legacy/build/*.min.mjs"
+  - "!**/node_modules/pdfjs-dist/legacy/build/pdf.sandbox.mjs"
+  # Motor de OCR: en Node se cargan los .js + .wasm (las .wasm.js, con el wasm incrustado, son para navegadores)
+  - "!**/node_modules/tesseract.js-core/*.wasm.js"
+# Idiomas de Chromium incluidos (menús del sistema, corrector): español e inglés
+electronLanguages: [es, es-419, en-US, en]
+asar: true
+# Fuera del ASAR: binarios nativos (node-pty, canvas) y el motor de OCR, que se cargan desde rutas reales
+asarUnpack:
+  - "**/node_modules/node-pty/**"
+  - "**/node_modules/@napi-rs/**"
+  - "**/node_modules/tesseract.js/**"
+  - "**/node_modules/tesseract.js-core/**"
+  # El OCR corre en un worker_thread de tesseract, y esos hilos no leen el ASAR: su código y lo que requiere, fuera
+  - "**/node_modules/{wasm-feature-detect,regenerator-runtime,is-url,bmp-js}/**"
+# node-pty y @napi-rs/canvas traen binarios precompilados N-API: no hace falta recompilar para Electron
+npmRebuild: false
+# Quita los binarios nativos de otras plataformas y comprueba que está el de la plataforma de destino
+afterPack: scripts/after-pack.cjs
+
+# Fusibles de Electron (lista de comprobación de seguridad n.º 19, ARCHITECTURE §4.1 y docs/SECURITY.md)
+electronFuses:
+  runAsNode: false
+  enableCookieEncryption: true
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+  loadBrowserProcessSpecificV8Snapshot: false
+  grantFileProtocolExtraPrivileges: false
+  resetAdHocDarwinSignature: true
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  executableName: ZHASKA
+  # Sin certificado de firma (decisión del 22-11-2026): SmartScreen avisará al instalar
+  signAndEditExecutable: true
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: ZHASKA
+  uninstallDisplayName: ZHASKA
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  multiLanguageInstaller: false
+  installerLanguages: [es_ES]
+  language: "3082"
+  installerSidebar: build/installerSidebar.bmp
+  uninstallerSidebar: build/uninstallerSidebar.bmp
+  artifactName: ZHASKA-Setup-${version}.${ext}
+  differentialPackage: true
+
+mac:
+  target:
+    - target: dmg
+    - target: zip
+  category: public.app-category.developer-tools
+  # Sin firma: solo para desarrollo y pruebas en el Mac (el producto es para Windows)
+  identity: null
+  artifactName: ZHASKA-${version}-${arch}.${ext}
+
+# Actualizaciones: GitHub Releases. owner/repo se deducen del remoto de Git cuando exista el repositorio
+# (decisión pendiente en ROADMAP). Sin repositorio, la app indica que las actualizaciones no están configuradas.
+# Se publica como BORRADOR: no llega a nadie hasta que lo publicas a mano tras probar el instalador.
+publish:
+  provider: github
+  releaseType: draft
