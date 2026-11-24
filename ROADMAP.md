@@ -16,9 +16,11 @@ Leyenda: ✅ terminada · 🔄 en curso · ⏳ pendiente
 | 9 | Seguridad y persistencia (endurecimiento) | ✅ |
 | 10 | Instalación y actualizaciones | ✅ (instalado y funcionando en el PC Windows, 24-11-2026; falta probar ahí la actualización) |
 | 11 | Pruebas y optimización | ✅ Aprobada (24-11-2026) |
+| 12 | Asistente de empresa (chat aparte con tus documentos) | ⏳ pendiente de aprobación para empezar |
 
 **Hito v0.1 "primer agente útil"** = fases 2–7: abrir un proyecto, pedir un cambio a Gemma, verlo trabajar en el panel de actividad, revisar el diff y aceptarlo.
 **Hito v1.0** = fases 8–11: adjuntos, endurecimiento, instalador y updates.
+**Hito v1.1** = fase 12: asistente de empresa en el PC del usuario, como prueba real y propuesta para IT.
 
 ---
 
@@ -250,6 +252,25 @@ El 12B no cabe en 8 GB ni con poco contexto (lo que no cabe es el modelo, no el 
 Alcance original:
 Rendimiento (arranque < 2 s, proyecto de 50 000 archivos navegable), memoria, pruebas de larga duración del agente, ajuste de prompts por modelo.
 
+## Fase 12 — Asistente de empresa ⏳
+
+**Añadida el 24-11-2026.** Un chat aparte del de programación para el trabajo de oficina (Back Office en Angel Camacho): preguntar a tus documentos, resumir, redactar y traducir, **sin que nada salga del PC**.
+
+**Decisiones del usuario (24-11-2026)**:
+- Funciona **primero solo en el PC del usuario**, dentro de ZHASKA. Llevarlo a un servidor de la empresa sería otra fase, y solo con permiso de IT.
+- IT y la dirección **aún no lo saben**: durante la prueba solo se usan documentos que el usuario puede usar libremente, y la fase produce una **propuesta para IT**.
+
+Alcance:
+- **Sección «Asistente»** separada de los proyectos: conversaciones propias, no ligadas a ningún proyecto. **Sin herramientas que escriban ni ejecuten nada**: solo lee lo que tú le das. Es más seguro que el agente por diseño.
+- **Bases de conocimiento**: carpetas que eliges con el selector, solo lectura. Se reutiliza el extractor de la Fase 8 (PDF, también escaneados con OCR, Word, Excel, CSV, texto). El texto se trocea y se indexa **en local**: un modelo de embeddings de Ollama (por ejemplo EmbeddingGemma, elegido midiendo) y SQLite. Búsqueda que combina palabras exactas y significado. Si cambia o se borra un documento, se actualiza solo.
+- **Respuestas con fuentes**: cada respuesta cita documento y página, con enlace para abrirlo. Si la respuesta no está en tus documentos, lo dice («No aparece en tus documentos») en vez de inventar. Para importes, fechas o clientes, avisa de que hay que comprobarlo en el original.
+- **Tareas de oficina** con plantillas: resumir un PDF, redactar un correo, traducir (cargos en francés, alemán, portugués, italiano o polaco), comparar dos Excel, sacar datos de un documento a una tabla.
+- **Privacidad**: sin internet, de forma comprobable (ninguna conexión salvo a Ollama en el propio PC). Bases de conocimiento borrables, y opción de no guardar el historial de una conversación. Los documentos marcados como confidenciales nunca entran en el registro.
+- **Modelo**: se mide si para preguntas y resúmenes basta Gemma 4 E4B (148 tok/s en el PC) o hace falta el 12B (~14 tok/s).
+- **Propuesta para IT** (`docs/PROPUESTA-IT.md`): qué hace, qué datos toca, dónde se guardan, qué riesgos tiene y cómo se controlan, y qué haría falta para un servidor interno con acceso desde el navegador (hardware de 16–24 GB de VRAM, usuarios, permisos por documento, auditoría).
+
+**Salida**: evaluación con un conjunto de preguntas de respuesta conocida sobre documentos de prueba (acierta, cita bien la fuente y dice «no aparece» cuando no está; objetivo ≥ 90 % de citas correctas y ningún dato inventado sin avisar); prueba de que no sale tráfico fuera del PC; propuesta para IT revisada por el usuario.
+
 ---
 
 ## Decisiones tomadas (22-11-2026)
@@ -263,4 +284,4 @@ Ninguna.
 **Repositorio (24-11-2026)**: [github.com/Eskiador/zhaska](https://github.com/Eskiador/zhaska), público (las actualizaciones automáticas desde un repositorio privado exigirían un token dentro de la app). CI en cada push; al etiquetar `vX.Y.Z`, `release.yml` genera el instalador y un borrador de versión.
 
 ## Más allá de la v1 (no planificado aún)
-Búsqueda semántica con embeddings locales, proveedores externos opcionales (API compatible OpenAI), sandbox de ejecución, tema claro, multiventana, integración Git avanzada (commits/PR asistidos).
+**Servidor interno del asistente de empresa** (acceso desde el navegador para 5–10 personas, solo con aprobación de IT), búsqueda semántica en el código con embeddings locales, proveedores externos opcionales (API compatible OpenAI), sandbox de ejecución, tema claro, multiventana, integración Git avanzada (commits/PR asistidos).
