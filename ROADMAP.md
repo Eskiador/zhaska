@@ -235,7 +235,9 @@ NSIS, icono y marca, onboarding completo con verificación paso a paso, electron
 
 **Ajuste de prompts por modelo** (medido, no supuesto): con Gemma 4 E4B, prompt completo **6/7** frente a compacto **4/7** → todos los modelos usan el completo; a los de ≤ 5B se les limita la temperatura. A ningún modelo se le ofrecen herramientas bloqueadas o que no aplican. Gemma 4 12B en las 7 tareas cortas: 5/7 (los dos fallos fueron del modelo: renombró a otro nombre y una vez se detuvo sin editar).
 
-**Pendiente en el PC con Windows**: `npm run test:perf` sobre `dist/win-unpacked` y las evaluaciones del agente con la RTX 5060.
+**Medido en el PC con Windows** (RTX 5060 8 GB, 24-11-2026, Banco de pruebas): Gemma 4 E4B genera a **148,5 tok/s** y lee el prompt (prefill) a **14 509 tok/s**.
+
+**Pendiente en el PC con Windows**: el mismo banco con Gemma 4 12B, `npm run test:perf` sobre `dist/win-unpacked` y las evaluaciones del agente con la RTX 5060.
 
 Alcance original:
 Rendimiento (arranque < 2 s, proyecto de 50 000 archivos navegable), memoria, pruebas de larga duración del agente, ajuste de prompts por modelo.
