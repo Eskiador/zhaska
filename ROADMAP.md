@@ -235,9 +235,17 @@ NSIS, icono y marca, onboarding completo con verificación paso a paso, electron
 
 **Ajuste de prompts por modelo** (medido, no supuesto): con Gemma 4 E4B, prompt completo **6/7** frente a compacto **4/7** → todos los modelos usan el completo; a los de ≤ 5B se les limita la temperatura. A ningún modelo se le ofrecen herramientas bloqueadas o que no aplican. Gemma 4 12B en las 7 tareas cortas: 5/7 (los dos fallos fueron del modelo: renombró a otro nombre y una vez se detuvo sin editar).
 
-**Medido en el PC con Windows** (RTX 5060 8 GB, 24-11-2026, Banco de pruebas): Gemma 4 E4B genera a **148,5 tok/s** y lee el prompt (prefill) a **14 509 tok/s**.
+**Medido en el PC con Windows** (RTX 5060 8 GB, 24-11-2026, Banco de pruebas):
 
-**Pendiente en el PC con Windows**: el mismo banco con Gemma 4 12B, `npm run test:perf` sobre `dist/win-unpacked` y las evaluaciones del agente con la RTX 5060.
+| Modelo | Contexto | En GPU | Generación | Prefill |
+|---|---|---|---|---|
+| Gemma 4 E4B | 32K | 100 % | **148,5 tok/s** | **14 509 tok/s** |
+| Gemma 4 12B | 32K | 67 % | 13,1 tok/s | 606 tok/s |
+| Gemma 4 12B | 8K | 70 % | 14,8 tok/s | 680 tok/s |
+
+El 12B no cabe en 8 GB ni con poco contexto (lo que no cabe es el modelo, no el contexto) y una parte va al procesador. Aun así **sigue siendo el recomendado para el agente**: en las tareas largas (`tests/eval/long.eval.ts`, Mac M4) el 12B resuelve **3/3** y el E4B **0/3** (da por terminado con pruebas fallando). La estimación de memoria se corrigió con estas medidas (densos ×1,35), el 12B solo se recomienda si queda ≥ 60 % en GPU y la barra lateral avisa cuando el modelo cargado va en parte en el procesador.
+
+**Pendiente en el PC con Windows**: `npm run test:perf` sobre `dist/win-unpacked` y las evaluaciones del agente con la RTX 5060.
 
 Alcance original:
 Rendimiento (arranque < 2 s, proyecto de 50 000 archivos navegable), memoria, pruebas de larga duración del agente, ajuste de prompts por modelo.

@@ -4,6 +4,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Mejorado — Modelos en tarjetas de 8 GB (24-11-2026, medido en el PC con Windows)
+- La barra lateral avisa cuando el modelo cargado no cabe entero en la tarjeta gráfica y parte va al procesador (más lento), y explica por qué y qué alternativa hay.
+- Estimación de memoria corregida con las medidas reales (el 12B necesita ≈ 10 GB, no 8) y textos de los modelos con datos medidos: el 12B va a ~14 tok/s en una RTX 5060 pero es el que resuelve las tareas largas (3/3 frente a 0/3 del E4B, que va a 148 tok/s). Con menos de un 60 % en GPU ya no se recomienda el 12B.
+
 ### Corregido — Windows (24-11-2026, detectado por la integración continua de GitHub)
 - **Los PDF no se podían leer en Windows**: la carpeta de fuentes de pdfjs se pasaba terminada en «\\» y pdfjs exige «/» («Invalid factory url»). Afectaba a PDF con texto y escaneados.
 - **No se podían abrir proyectos dentro de la carpeta temporal de Windows** (`AppData\Local\Temp`) cuando Windows la da con nombre corto 8.3: se comparaba solo una forma de la ruta y se aplicaba la regla de `~\AppData`. Ahora se comparan las dos.

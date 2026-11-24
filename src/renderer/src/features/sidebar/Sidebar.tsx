@@ -247,6 +247,10 @@ function ModelCard() {
   const installed = useOllama((s) => isInstalled(s.installed, model))
   const pull = useOllama((s) => s.pulls[model])
   const ramGB = useOllama((s) => s.hardware?.ramGB ?? 0)
+  const unified = useOllama((s) => s.hardware?.unified ?? false)
+  const gpuPct = loaded?.sizeBytes ? Math.round((loaded.vramBytes / loaded.sizeBytes) * 100) : 0
+  // Con GPU dedicada, si parte del modelo va al procesador la velocidad cae a una fracción (medido: 12B en 8 GB, ~70 %)
+  const spills = !!loaded && !unified && gpuPct < 90
   const sizeGB = loaded ? loaded.sizeBytes / 1024 ** 3 : 0
   const minutes = loaded?.expiresAt ? Math.max(0, Math.round((loaded.expiresAt - Date.now()) / 60000)) : null
   const downloading = pull && !['done', 'error', 'cancelled'].includes(pull.phase)
@@ -257,7 +261,9 @@ function ModelCard() {
       : downloading
         ? `Descargando · ${Math.round(pct)} %`
         : loaded
-          ? `En memoria · ${loaded.sizeBytes ? Math.round((loaded.vramBytes / loaded.sizeBytes) * 100) : 0} % GPU${minutes !== null ? ` · libera en ${minutes} min` : ''}`
+          ? spills
+            ? `${gpuPct} % en GPU · parte en el procesador, más lento`
+            : `En memoria · ${gpuPct} % GPU${minutes !== null ? ` · libera en ${minutes} min` : ''}`
           : installed
             ? 'En disco · se carga al usarlo'
             : 'Sin descargar'
@@ -265,6 +271,7 @@ function ModelCard() {
     <button
       type="button"
       onClick={() => useUI.getState().openDialog(installed ? 'settings' : 'models', 'ollama')}
+      title={spills ? `Solo el ${gpuPct} % del modelo cabe en la tarjeta gráfica; el resto lo ejecuta el procesador y responde varias veces más lento. Es lo normal con Gemma 4 12B y 8 GB: va más despacio, pero resuelve mucho mejor las tareas largas. Para preguntas rápidas puedes cambiar a Gemma 4 E4B, que cabe entero.` : undefined}
       className="mb-1.5 w-full rounded-lg border border-line-subtle bg-bg-2 px-3 py-2.5 text-left hover:border-line"
     >
       <div className="flex items-center gap-2 text-small">
@@ -279,7 +286,7 @@ function ModelCard() {
       <div className="mt-2 h-1 overflow-hidden rounded-full bg-bg-4">
         <div className={cn('h-full rounded-full', downloading ? 'bg-accent' : 'bg-accent/70')} style={{ width: `${Math.min(100, pct)}%` }} />
       </div>
-      <div className="mt-1.5 truncate text-tiny text-fg-3">{line}</div>
+      <div className={cn('mt-1.5 truncate text-tiny', spills ? 'text-warn' : 'text-fg-3')}>{line}</div>
     </button>
   )
 }

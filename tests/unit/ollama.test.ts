@@ -6,7 +6,7 @@ import { OllamaProvider } from '../../src/agent/providers/ollama'
 import { friendlyPullError, PullTracker, pullPhase } from '../../src/main/services/models'
 import { toTurns } from '../../src/main/services/chat'
 import { chatSystemPrompt, titleFromMessage } from '../../src/shared/agent/prompts'
-import { estimateFit, GEMMA4_VARIANTS } from '../../src/shared/models/catalog'
+import { estimateFit, GEMMA4_VARIANTS, gpuShare, recommendVariant } from '../../src/shared/models/catalog'
 
 /** Servidor falso de Ollama: respuestas NDJSON troceadas a propósito para probar el parser. */
 let server: Server
@@ -163,6 +163,22 @@ describe('recomendación de modelos', () => {
     expect(estimateFit(v('gemma4:e4b-it-qat'), hw)).toBe('gpu')
     expect(estimateFit(v('gemma4:12b-it-qat'), hw)).toBe('partial')
     expect(estimateFit(v('gemma4:26b-a4b-it-qat'), hw)).toBe('no-memory')
+    // Medido en ese PC: el 12B queda al ~70 % en GPU (13–15 tok/s, E4B 148), pero es el único que resuelve las
+    // tareas largas (3/3 frente a 0/3) → se recomienda el 12B
+    expect(gpuShare(v('gemma4:12b-it-qat'), hw)).toBeCloseTo(0.74, 1)
+    expect(recommendVariant(hw).tag).toBe('gemma4:12b-it-qat')
+  })
+
+  it('con 12 GB de VRAM o en un Mac de 16 GB, el 12B cabe entero', () => {
+    expect(estimateFit(v('gemma4:12b-it-qat'), { vramGB: 12, ramGB: 32, gpu: 'RTX 4070' })).toBe('gpu')
+    expect(recommendVariant({ vramGB: 16 * 0.67, ramGB: 16, gpu: 'Apple M4', unified: true }).tag).toBe('gemma4:12b-it-qat')
+    expect(estimateFit(v('gemma4:12b-it-qat'), { vramGB: 10, ramGB: 32, gpu: 'RTX 3080' })).toBe('partial')
+  })
+
+  it('con poca GPU no se recomienda un 12B que iría casi todo en el procesador', () => {
+    expect(recommendVariant({ vramGB: 6, ramGB: 32, gpu: 'RTX 2060' }).tag).toBe('gemma4:e4b-it-qat')
+    expect(recommendVariant({ vramGB: 4, ramGB: 32, gpu: 'GTX 1650' }).tag).toBe('gemma4:e2b-it-qat')
+    expect(recommendVariant({ vramGB: 0, ramGB: 8, gpu: 'CPU' }).tag).toBe('gemma4:e2b-it-qat')
   })
 })
 

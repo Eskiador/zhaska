@@ -22,8 +22,8 @@ const caps = (audio = false) => ({ tools: true, vision: true, thinking: true, au
 
 export const GEMMA4_VARIANTS: ModelVariant[] = [
   { tag: 'gemma4:e2b-it-qat', family: 'gemma4', size: 'E2B', quant: 'QAT', downloadGB: 4.3, contextK: 128, capabilities: caps(true), note: 'Muy rápido. Útil para tareas auxiliares (títulos, resúmenes).' , hfRepo: 'google/gemma-4-E2B-it-qat-q4_0-gguf' },
-  { tag: 'gemma4:e4b-it-qat', family: 'gemma4', size: 'E4B', quant: 'QAT', downloadGB: 6.1, contextK: 128, capabilities: caps(true), profile: 'fast', note: 'Cabe entero en GPU. Respuestas rápidas y tareas pequeñas.' , hfRepo: 'google/gemma-4-E4B-it-qat-q4_0-gguf' },
-  { tag: 'gemma4:12b-it-qat', family: 'gemma4', size: '12B', quant: 'QAT', downloadGB: 7.2, contextK: 256, capabilities: caps(), profile: 'balanced', note: 'Mejor calidad que cabe casi entera en 8 GB de VRAM.' , hfRepo: 'google/gemma-4-12B-it-qat-q4_0-gguf' },
+  { tag: 'gemma4:e4b-it-qat', family: 'gemma4', size: 'E4B', quant: 'QAT', downloadGB: 6.1, contextK: 128, capabilities: caps(true), profile: 'fast', note: 'Cabe entero en GPU y es muy rápido (148 tok/s en una RTX 5060). Bien para preguntas y cambios pequeños; en tareas largas de varios pasos falla mucho más que el 12B (0/3 frente a 3/3).' , hfRepo: 'google/gemma-4-E4B-it-qat-q4_0-gguf' },
+  { tag: 'gemma4:12b-it-qat', family: 'gemma4', size: '12B', quant: 'QAT', downloadGB: 7.2, contextK: 256, capabilities: caps(), profile: 'balanced', note: 'El que mejor trabaja como agente. Con 8 GB de VRAM no cabe entero y va más despacio (medido en una RTX 5060: ~70 % en GPU, ~14 tok/s), pero resuelve las tareas largas. Con 12 GB o más, entero y rápido.' , hfRepo: 'google/gemma-4-12B-it-qat-q4_0-gguf' },
   { tag: 'gemma4:12b-it-q4_K_M', family: 'gemma4', size: '12B', quant: 'Q4_K_M', downloadGB: 8.0, contextK: 256, capabilities: caps(), note: 'Cuantización clásica; algo mayor que QAT sin ventaja clara.' },
   { tag: 'gemma4:26b-a4b-it-qat', family: 'gemma4', size: '26B A4B', quant: 'QAT', downloadGB: 16, contextK: 256, capabilities: caps(), profile: 'quality', note: 'MoE (~4B activos). Requiere ≥ 32 GB de RAM con 8 GB de VRAM.' , hfRepo: 'google/gemma-4-26B-A4B-it-qat-q4_0-gguf' },
   { tag: 'gemma4:31b-it-qat', family: 'gemma4', size: '31B', quant: 'QAT', downloadGB: 19, contextK: 256, capabilities: caps(), note: 'Denso. Demasiado lento con 8 GB de VRAM.' , hfRepo: 'google/gemma-4-31B-it-qat-q4_0-gguf' },
@@ -46,9 +46,13 @@ export type Fit = 'gpu' | 'partial' | 'tight' | 'too-slow' | 'no-memory'
  * Estimación conservadora de encaje (la medición real la da el banco de pruebas).
  * GPU dedicada: VRAM útil ≈ VRAM − 0,8 GB (escritorio); RAM disponible para el modelo ≈ RAM − 6 GB (sistema + app).
  * Memoria unificada: la GPU puede usar ≈ 2/3 de la RAM; por encima, muy justo hasta RAM − 3 GB.
+ * Memoria necesaria: los modelos «E» (E2B, E4B) guardan buena parte del tamaño en tablas de embeddings por capa
+ * que no pesan en la GPU (E4B, 6,1 GB, cabe entero en 8 GB); los densos necesitan bastante más que su descarga.
+ * Medido el 24-11-2026 en la RTX 5060 8 GB con Windows: el 12B (7,2 GB) quedó al 67 % en GPU con 32K de contexto
+ * y al 70 % con 8K, es decir, ≈ 10 GB cargado: ×1,35 como mínimo.
  */
 export function estimateFit(v: ModelVariant, hw: Hardware): Fit {
-  const need = v.downloadGB * 1.1 // + caché KV y buffers con num_ctx 32K
+  const need = memoryNeedGB(v) // + caché KV y buffers
   if (hw.unified) {
     if (need <= hw.vramGB) return 'gpu'
     return need <= hw.ramGB - 3 ? 'tight' : 'no-memory'
@@ -62,10 +66,25 @@ export function estimateFit(v: ModelVariant, hw: Hardware): Fit {
   return spill > ramFree * 0.5 ? 'tight' : 'partial'
 }
 
-/** Variante recomendada: la de más calidad que cabe sin quedar "muy justa". */
+const memoryNeedGB = (v: ModelVariant) => v.downloadGB * (v.size.startsWith('E') ? 1.1 : 1.35)
+
+/** Parte estimada del modelo que queda en la GPU (1 = entero). */
+export function gpuShare(v: ModelVariant, hw: Hardware): number {
+  const vram = hw.unified ? hw.vramGB : hw.vramGB - 0.8
+  return Math.max(0, Math.min(1, vram / memoryNeedGB(v)))
+}
+
+/**
+ * Variante recomendada: la de más calidad que cabe entera en la GPU o, como mucho, con ~60 % dentro.
+ * Medido el 24-11-2026 en la RTX 5060 8 GB: el 12B (≈ 70 % en GPU) va a 13–15 tok/s frente a 148 del E4B, pero
+ * es el único que resuelve las tareas largas del agente (3/3 frente a 0/3 del E4B, tests/eval/long.eval.ts):
+ * se prefiere calidad, y la barra lateral avisa de que va más lento. Con menos GPU (< 60 %) el 12B iría casi
+ * todo en el procesador y se baja de modelo.
+ */
 export function recommendVariant(hw: Hardware): ModelVariant {
-  const order = ['gemma4:12b-it-qat', 'gemma4:e4b-it-qat', 'gemma4:e2b-it-qat']
-  return GEMMA4_VARIANTS.find((v) => order.includes(v.tag) && ['gpu', 'partial'].includes(estimateFit(v, hw))) ?? GEMMA4_VARIANTS.find((v) => v.tag === 'gemma4:e2b-it-qat')!
+  const order = ['gemma4:12b-it-qat', 'gemma4:e4b-it-qat', 'gemma4:e2b-it-qat'].map((t) => GEMMA4_VARIANTS.find((v) => v.tag === t)!)
+  const ok = (v: ModelVariant) => estimateFit(v, hw) === 'gpu' || (estimateFit(v, hw) === 'partial' && gpuShare(v, hw) >= 0.6)
+  return order.find(ok) ?? order.slice(1).find((v) => estimateFit(v, hw) !== 'no-memory') ?? order[2]!
 }
 
 export const FIT_LABEL: Record<Fit, string> = {
