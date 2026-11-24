@@ -12,8 +12,12 @@ export interface SensitiveContext {
   userData: string
   /** Carpeta de instalación del programa */
   appDir?: string
-  /** Carpeta temporal del sistema: se permite (pruebas, proyectos de usar y tirar) */
-  tempDir?: string
+  /**
+   * Carpeta temporal del sistema: se permite (pruebas, proyectos de usar y tirar). Admite varias formas de la
+   * misma ruta: en Windows %TEMP% puede venir con nombres cortos 8.3 (C:\\Users\\RUNNER~1\\…) y la ruta real con
+   * los largos; si solo se comparase una, un proyecto en Temp caería en la regla de ~\\AppData.
+   */
+  tempDir?: string | string[]
   env?: Record<string, string | undefined>
 }
 
@@ -53,7 +57,7 @@ export function workspaceRootProblem(abs: string, ctx: SensitiveContext): string
   if (inside(userData, target)) return 'Contiene los datos internos de ZHASKA (base de datos, copias y adjuntos): elige una carpeta más concreta.'
   if (ctx.appDir && (inside(target, norm(ctx.appDir)) || inside(norm(ctx.appDir), target))) return 'Es la carpeta de instalación de ZHASKA.'
   // Temporales (también /private/var/folders de macOS) e iCloud Drive: no hay nada del sistema que proteger
-  const temps = [ctx.tempDir, ...(win ? [] : ['/tmp', '/private/tmp', '/var/folders', '/private/var/folders'])].filter((x): x is string => !!x)
+  const temps = [...[ctx.tempDir ?? []].flat(), ...(win ? [] : ['/tmp', '/private/tmp', '/var/folders', '/private/var/folders'])].filter((x): x is string => !!x)
   if (temps.some((t) => inside(target, norm(t))) || HOME_ALLOWED.some((s) => inside(target, norm(p.join(ctx.home, s))))) return null
   for (const s of win ? WIN_SYSTEM(ctx.env ?? process.env) : POSIX_SYSTEM) {
     if (inside(target, norm(s))) return `Es una carpeta del sistema (${s}).`

@@ -135,7 +135,11 @@ try {
 } catch (e) {
   check('sin excepciones', false, e.message)
 } finally {
-  rmSync(tmp, { recursive: true, force: true })
+  try {
+    rmSync(tmp, { recursive: true, force: true, maxRetries: 3 })
+  } catch {
+    /* en Windows puede quedar algún archivo abierto: el sistema limpia la carpeta temporal */
+  }
 }
 const out = arg('--json')
 if (out) writeFileSync(out, JSON.stringify(results, null, 2))

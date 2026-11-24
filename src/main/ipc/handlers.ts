@@ -84,7 +84,7 @@ export function registerHandlers(ctx: MainContext) {
     home: map(app.getPath('home')),
     userData: map(app.getPath('userData')),
     appDir: app.isPackaged ? map(dirname(app.getPath('exe'))) : undefined,
-    tempDir: map(tmpdir()),
+    tempDir: [tmpdir(), realOr(tmpdir())],
   })
   const sensitiveCtxs = [sensitiveCtx((p) => p), sensitiveCtx(realOr)]
   const rootProblem = (p: string) => {

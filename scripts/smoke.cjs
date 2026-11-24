@@ -377,7 +377,12 @@ app.on('browser-window-created', (_e, win) => {
       }
       const failed = results.filter((r) => !r.ok).length
       console.log(`\n${results.length - failed}/${results.length} comprobaciones superadas`)
-      fs.rmSync(tmp, { recursive: true, force: true })
+      // En Windows la app aún tiene abiertos archivos de la carpeta (base de datos, vigilante): no debe colgar la prueba
+      try {
+        fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 3 })
+      } catch {
+        /* el sistema limpiará la carpeta temporal */
+      }
       app.exit(failed ? 1 : 0)
     }
   })

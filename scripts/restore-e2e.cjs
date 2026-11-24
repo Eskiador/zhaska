@@ -46,5 +46,9 @@ for (const phase of ['1', '2', '3']) {
 }
 
 console.log(`\n${total - failed}/${total} comprobaciones superadas`)
-fs.rmSync(tmp, { recursive: true, force: true })
+try {
+  fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 3 })
+} catch {
+  /* en Windows puede quedar algún archivo abierto: el sistema limpia la carpeta temporal */
+}
 process.exit(failed ? 1 : 0)

@@ -146,6 +146,11 @@ describe('carpetas sensibles', () => {
   ])('%s se permite', (p, ctx) => {
     expect(workspaceRootProblem(p, ctx)).toBeNull()
   })
+  it('Windows: Temp con nombre corto 8.3 y ruta real con nombre largo', () => {
+    const ctx = { ...win, home: 'C:\\Users\\runneradmin', userData: 'C:\\Users\\runneradmin\\AppData\\Roaming\\ZHASKA', tempDir: ['C:\\Users\\RUNNER~1\\AppData\\Local\\Temp', 'C:\\Users\\runneradmin\\AppData\\Local\\Temp'] }
+    expect(workspaceRootProblem('C:\\Users\\runneradmin\\AppData\\Local\\Temp\\zh-1\\proyecto', ctx)).toBeNull()
+    expect(workspaceRootProblem('C:\\Users\\runneradmin\\AppData\\Roaming\\Code', ctx)).toMatch(/credenciales/)
+  })
 })
 
 describe('lecturas fuera del proyecto', () => {

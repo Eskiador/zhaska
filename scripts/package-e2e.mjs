@@ -206,7 +206,11 @@ try {
   check('sin excepciones', false, e.message)
 } finally {
   server?.close()
-  rmSync(tmp, { recursive: true, force: true })
+  try {
+    rmSync(tmp, { recursive: true, force: true, maxRetries: 3 })
+  } catch {
+    /* en Windows puede quedar algún archivo abierto: el sistema limpia la carpeta temporal */
+  }
 }
 const failed = results.filter((r) => !r.ok).length
 console.log(`\n${results.length - failed}/${results.length} comprobaciones superadas`)
