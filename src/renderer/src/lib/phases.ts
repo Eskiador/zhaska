@@ -8,9 +8,10 @@ export const PHASE_NAMES: Record<number, string> = {
   8: 'Adjuntos',
   9: 'Seguridad y persistencia',
   10: 'Instalación y actualizaciones',
+  11: 'Pruebas y optimización',
 }
 
 /** Última fase terminada (se muestra en Configuración → Acerca de). */
-export const CURRENT_PHASE = 10
+export const CURRENT_PHASE = 11
 
 export const lockedHint = (phase: number) => `Disponible en la Fase ${phase} · ${PHASE_NAMES[phase] ?? ''}`

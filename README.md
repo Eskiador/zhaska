@@ -8,7 +8,7 @@ Entorno de programación de escritorio para Windows con un **agente de IA que se
 - **Adjuntos**: PDF (también escaneados, con OCR), Word, Excel, CSV, código, imágenes y ZIP. Se procesan en local y la IA puede leerlos pero no modificarlos.
 - **Seguro por defecto**: el agente trabaja dentro del proyecto; lo peligroso, los borrados, los archivos protegidos y cualquier lectura fuera del proyecto piden tu confirmación. Copias de seguridad diarias que puedes restaurar, y exportar o importar todos tus datos en un archivo.
 
-> **Estado: las 11 fases del plan están completadas.** Queda validarlo en el PC con Windows: mediciones de Gemma 4 con la RTX 5060 (fases 4, 5 y 11) e instalación y actualización (fase 10), siguiendo [docs/WINDOWS.md](docs/WINDOWS.md). Ver [ROADMAP.md](ROADMAP.md).
+> **Estado: las 11 fases del plan están completadas y aprobadas.** Instalado y funcionando en el PC con Windows (24-11-2026); quedan por hacer allí la prueba de actualización y las mediciones completas del agente con la RTX 5060, siguiendo [docs/WINDOWS.md](docs/WINDOWS.md). Ver [ROADMAP.md](ROADMAP.md).
 
 ## Instalación (Windows)
 

@@ -14,8 +14,8 @@ Leyenda: ✅ terminada · 🔄 en curso · ⏳ pendiente
 | 7 | Terminal y editor | ✅ |
 | 8 | Adjuntos | ✅ |
 | 9 | Seguridad y persistencia (endurecimiento) | ✅ |
-| 10 | Instalación y actualizaciones | ✅ (pendiente de probar el instalador en el PC Windows) |
-| 11 | Pruebas y optimización | ✅ (pendiente de aprobación y de medir en el PC Windows) |
+| 10 | Instalación y actualizaciones | ✅ (instalado y funcionando en el PC Windows, 24-11-2026; falta probar ahí la actualización) |
+| 11 | Pruebas y optimización | ✅ Aprobada (24-11-2026) |
 
 **Hito v0.1 "primer agente útil"** = fases 2–7: abrir un proyecto, pedir un cambio a Gemma, verlo trabajar en el panel de actividad, revisar el diff y aceptarlo.
 **Hito v1.0** = fases 8–11: adjuntos, endurecimiento, instalador y updates.
@@ -66,7 +66,7 @@ Alcance original:
 - Fundamentos visuales de la referencia de diseño (Forja): paleta, Geist, radios; sidebar, barra de título, explorador como panel, "Nuevo proyecto" y Configuración rediseñados.
 
 **Criterios de salida comprobados**: 52 tests unitarios y prueba de humo de la app real **22/22** (seguridad, IPC, SQLite, archivos, watcher, edición y guardado con el teclado, reapertura tras reiniciar), estable en 3 ejecuciones seguidas.
-**Pendiente**: ejecutar el CI en `windows-latest` necesita un repositorio de GitHub (decisión pendiente); el workflow está listo en `.github/workflows/ci.yml`. Las *fuses* de Electron se aplican al empaquetar (Fase 10).
+**CI**: desde el 24-11-2026 `.github/workflows/ci.yml` se ejecuta en `windows-latest` y `macos-latest` en cada push al repositorio [Eskiador/zhaska](https://github.com/Eskiador/zhaska) (detectó dos fallos que solo ocurrían en Windows; ver CHANGELOG). Las *fuses* de Electron se aplican al empaquetar (Fase 10).
 
 Alcance original:
 - Ventana segura (contextIsolation, sandbox, CSP, protocolo `app://`, fuses), contrato IPC tipado con zod.
@@ -218,7 +218,7 @@ NSIS, icono y marca, onboarding completo con verificación paso a paso, electron
 
 ## Fase 11 — Pruebas y optimización ✅
 
-**Resultado (24-11-2026).** Detalle técnico en ARCHITECTURE §6.5 y §14.
+**Resultado (24-11-2026). Aprobada el 24-11-2026.** Detalle técnico en ARCHITECTURE §6.5 y §14.
 
 **Rendimiento** (app empaquetada, `npm run test:perf`, Mac M4):
 - Arranque hasta la interfaz usable: **0,34 s** (objetivo < 2 s).

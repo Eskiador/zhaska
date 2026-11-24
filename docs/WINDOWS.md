@@ -1,6 +1,6 @@
 # Probar ZHASKA en Windows
 
-Guía para validar la Fase 10 en el PC de destino (Windows 10 22H2 o 11, x64; referencia: RTX 5060 8 GB, Ryzen 7 5800X, 16 GB). El criterio es: **instalación limpia en un Windows sin Node, Python ni Git → asistente inicial → primera tarea del agente**, y **actualizar de una versión a la siguiente conservando los datos**.
+Guía para validar ZHASKA en el PC de destino (Windows 10 22H2 o 11, x64; referencia: RTX 5060 8 GB, Ryzen 7 5800X, 16 GB). El criterio es: **instalación limpia en un Windows sin Node, Python ni Git → asistente inicial → primera tarea del agente**, y **actualizar de una versión a la siguiente conservando los datos**.
 
 ## 1. Conseguir el instalador
 
@@ -16,9 +16,9 @@ softwareupdate --install-rosetta --agree-to-license
 npm run dist:win
 ```
 
-El instalador queda en `dist/ZHASKA-Setup-0.1.0.exe` (unos 160 MB). Mientras no exista el repositorio de GitHub, se genera sin canal de actualizaciones (la app lo indica en Acerca de). Sin Rosetta se puede generar igualmente la app de Windows sin instalador (`npx electron-builder --win dir --x64`, carpeta `dist/win-unpacked`), que es la que usan las pruebas automáticas.
+El instalador queda en `dist/ZHASKA-Setup-0.1.0.exe` (unos 160 MB), con el canal de actualizaciones del repositorio [Eskiador/zhaska](https://github.com/Eskiador/zhaska) (sin remoto de GitHub se generaría sin canal y la app lo indicaría en Acerca de). Sin Rosetta se puede generar igualmente la app de Windows sin instalador (`npx electron-builder --win dir --x64`, carpeta `dist/win-unpacked`), que es la que usan las pruebas automáticas.
 
-**B. Con GitHub Actions** (cuando exista el repositorio): al subir una etiqueta `v0.1.0`, el flujo `.github/workflows/release.yml` pasa todas las pruebas en `windows-latest`, genera el instalador y crea un **borrador** de versión en GitHub Releases. El borrador no llega a nadie hasta que lo publicas tú.
+**B. Con GitHub Actions**: al subir una etiqueta `v0.1.0`, el flujo `.github/workflows/release.yml` pasa todas las pruebas en `windows-latest`, genera el instalador y crea un **borrador** de versión en GitHub Releases. El borrador no llega a nadie hasta que lo publicas tú.
 
 ## 2. Instalar
 
@@ -29,7 +29,7 @@ El instalador queda en `dist/ZHASKA-Setup-0.1.0.exe` (unos 160 MB). Mientras no 
 
 Comprueba:
 - El programa está en `%LOCALAPPDATA%\Programs\ZHASKA` y tus datos en `%APPDATA%\ZHASKA` (carpetas separadas).
-- En **Configuración → Acerca de ZHASKA** aparece la versión y «Fase 10».
+- En **Configuración → Acerca de ZHASKA** aparece la versión y «Fase 11».
 
 ## 3. Asistente inicial
 
@@ -47,7 +47,7 @@ Si algo falla con Ollama, **Configuración → Ollama → Ver registros** (cuand
 
 ## 4. Actualización de 0.1.0 a 0.1.1
 
-Mientras no exista el repositorio de GitHub, la actualización se prueba con un canal local.
+La actualización se prueba con un canal local (sin publicar nada en GitHub).
 
 1. En el Mac (con Rosetta):
 
