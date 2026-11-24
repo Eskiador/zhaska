@@ -218,7 +218,8 @@ describe('proyectos: solo carpetas elegidas y no sensibles', () => {
   it('abrir o crear exige una carpeta elegida por el usuario', async () => {
     const db = openDatabase(':memory:')
     migrate(db)
-    const base = realpathSync(mkdtempSync(join(tmpdir(), 'zh-pol-')))
+    // .native: en Windows TEMP puede venir con nombres cortos 8.3 (RUNNER~1) y la app guarda la ruta larga
+    const base = realpathSync.native(mkdtempSync(join(tmpdir(), 'zh-pol-')))
     const ok = join(base, 'ok')
     const sens = join(base, 'sensible')
     mkdirSync(ok)

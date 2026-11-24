@@ -351,5 +351,5 @@ describe('edición y utilidades', () => {
     const r = await runCommand({ cwd: tmpdir(), command: 'echo hola-zhaska', shell: defaultShell('powershell'), timeoutMs: 20_000 })
     expect(r.exitCode).toBe(0)
     expect(r.output).toContain('hola-zhaska')
-  })
+  }, 30_000) // el primer arranque de PowerShell en Windows puede pasar de 5 s
 })

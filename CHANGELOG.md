@@ -4,6 +4,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Corregido — Windows (24-11-2026, detectado por la integración continua de GitHub)
+- **Los PDF no se podían leer en Windows**: la carpeta de fuentes de pdfjs se pasaba terminada en «\\» y pdfjs exige «/» («Invalid factory url»). Afectaba a PDF con texto y escaneados.
+- Pruebas que solo fallaban en las máquinas Windows de GitHub: rutas cortas 8.3 del directorio temporal (`RUNNER~1`), primer arranque lento de PowerShell y la búsqueda en 50 000 archivos (allí se registra el tiempo en vez de exigir el de un PC normal).
+
 ### Añadido — Fase 11 (23-11-2026)
 - **Buscar archivo en todo el proyecto** (Ctrl K): índice de nombres en el proceso principal que se mantiene al día con los cambios; antes solo encontraba archivos de carpetas ya abiertas en el explorador.
 - **Rendimiento en Acerca de**: tiempo de arranque y memoria de cada proceso, medidos en tu equipo.

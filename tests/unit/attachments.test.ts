@@ -1,9 +1,9 @@
 import { existsSync, mkdtempSync, readFileSync, readdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join, resolve, sep } from 'node:path'
+import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { deflateRawSync } from 'node:zlib'
-import { decodeText, detectKind, extract, parseCsv, unsafeZipName, type ExtractJob } from '../../src/main/attachments/extract'
+import { decodeText, detectKind, extract, fontsDirUrl, parseCsv, unsafeZipName, type ExtractJob } from '../../src/main/attachments/extract'
 import { AttachmentService } from '../../src/main/services/attachments'
 import { migrate, openDatabase } from '../../src/main/db/database'
 import { AttachmentsRepo, ConversationsRepo, ProjectsRepo } from '../../src/main/db/repos'
@@ -12,7 +12,7 @@ import { makeDocx, makeScannedPdf, makeTextPdf, makeXlsx, makeZip, renderTextIma
 
 const MODULES = resolve('node_modules')
 const ASSETS = {
-  pdfFontsDir: join(MODULES, 'pdfjs-dist', 'standard_fonts') + sep,
+  pdfFontsDir: join(MODULES, 'pdfjs-dist', 'standard_fonts'),
   ocrSources: ['eng', 'spa'].map((l) => join(MODULES, '@tesseract.js-data', l, '4.0.0_best_int', `${l}.traineddata.gz`)),
 }
 
@@ -302,5 +302,13 @@ describe('extracción directa', () => {
     expect(r).toMatchObject({ kind: 'sheet', meta: { chars: 8, sheets: [{ name: 'Datos', rows: 2, cols: 2 }] } })
     expect(readFileSync(join(dir, 'extracted.txt'), 'utf8')).toBe('a\tb\n1\t2\n')
     void deflateRawSync
+  })
+})
+
+describe('rutas en Windows', () => {
+  it('la carpeta de fuentes de pdfjs acaba siempre en «/» (en Windows path.sep es «\\»)', () => {
+    expect(fontsDirUrl('C:\\Users\\ana\\app\\standard_fonts')).toBe('C:/Users/ana/app/standard_fonts/')
+    expect(fontsDirUrl('C:\\Users\\ana\\app\\standard_fonts\\')).toBe('C:/Users/ana/app/standard_fonts/')
+    expect(fontsDirUrl('/opt/app/standard_fonts/')).toBe('/opt/app/standard_fonts/')
   })
 })

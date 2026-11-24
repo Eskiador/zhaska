@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, ipcMain, shell, utilityProcess } from 'electron'
-import { dirname, isAbsolute, join, resolve as resolvePath, sep } from 'node:path'
+import { dirname, isAbsolute, join, resolve as resolvePath } from 'node:path'
 import { existsSync, realpathSync, rmSync, statSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { z } from 'zod'
@@ -132,7 +132,7 @@ export function registerHandlers(ctx: MainContext) {
     // Proceso aparte (utilityProcess): lee el ASAR de la app instalada y un archivo malicioso no tumba main
     spawn: (file) => utilityProcess.fork(file, [], { serviceName: 'ZHASKA · Adjuntos' }) as never,
     assets: {
-      pdfFontsDir: join(pkgDir('pdfjs-dist'), 'standard_fonts') + sep,
+      pdfFontsDir: join(pkgDir('pdfjs-dist'), 'standard_fonts'),
       ocrSources: ['eng', 'spa'].map((l) => join(pkgDir(`@tesseract.js-data/${l}`), '4.0.0_best_int', `${l}.traineddata.gz`)),
     },
     ollama: () => ollama.api,

@@ -25,7 +25,7 @@ export interface ExtractJob {
   /** Carpeta con eng.traineddata.gz y spa.traineddata.gz */
   ocrDataDir: string
   ocrCacheDir: string
-  /** Carpeta standard_fonts de pdfjs-dist (con / final) */
+  /** Carpeta standard_fonts de pdfjs-dist (se normaliza con fontsDirUrl) */
   pdfFontsDir: string
 }
 
@@ -151,6 +151,14 @@ let ocr: { key: string; worker: Promise<OcrWorker>; idle?: NodeJS.Timeout } | nu
  * «utility» y pdfjs se cree en un navegador (pide un Web Worker y un DOM que no existen). Mientras se evalúa el
  * módulo se le muestra «browser», que es lo que ve en el proceso principal, y después se restaura.
  */
+/**
+ * pdfjs exige que la carpeta de fuentes acabe en «/» y en Windows `path.sep` es «\\» (lanzaba «Invalid factory
+ * url» y ningún PDF se leía). En Node la lee con fs.readFile, que en Windows acepta «C:/…» con barras normales.
+ */
+export function fontsDirUrl(dir: string): string {
+  return dir.replace(/\\/g, '/').replace(/\/?$/, '/')
+}
+
 let pdfjsModule: Promise<typeof import('pdfjs-dist/legacy/build/pdf.mjs')> | null = null
 function importPdfjs() {
   pdfjsModule ??= (async () => {
@@ -208,7 +216,7 @@ async function ocrImage(job: ExtractJob, png: Buffer): Promise<{ text: string; c
 async function extractPdf(job: ExtractJob, data: Buffer, progress: Progress) {
   const pdfjs = await importPdfjs()
   // pdfjs 6 ya no evalúa código del PDF; sin fuentes del sistema ni FontFace (solo se extrae texto)
-  const task = pdfjs.getDocument({ data: new Uint8Array(data), disableFontFace: true, useSystemFonts: false, enableXfa: false, standardFontDataUrl: job.pdfFontsDir, verbosity: 0 })
+  const task = pdfjs.getDocument({ data: new Uint8Array(data), disableFontFace: true, useSystemFonts: false, enableXfa: false, standardFontDataUrl: fontsDirUrl(job.pdfFontsDir), verbosity: 0 })
   let doc
   try {
     doc = await task.promise
