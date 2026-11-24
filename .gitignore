@@ -11,3 +11,6 @@ release/
 # Archivos de entorno con posibles secretos
 .env*
 !.env.example
+
+# Vídeo de demostración (se genera con scripts/video)
+/video/

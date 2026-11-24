@@ -84,6 +84,10 @@ export const useAssistant = create<AssistantStore>((set, get) => ({
           if (get().kbOpen === p.collectionId) void get().loadDocuments(p.collectionId)
         }
       })
+      // Progreso de los adjuntos del composer del asistente (el del chat de Código escucha el mismo evento)
+      onEvent('attachments.updated', (row) => {
+        if (get().attachments.some((a) => a.id === row.id)) set({ attachments: get().attachments.map((a) => (a.id === row.id ? toMeta(row) : a)) })
+      })
       onEvent('assistant.event', (e) => {
         const live = get().live[e.conversationId]
         const patchLive = (p: Partial<AssistantLive>) => live && set({ live: { ...get().live, [e.conversationId]: { ...live, ...p } } })

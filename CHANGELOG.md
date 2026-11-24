@@ -12,10 +12,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 - **Conversaciones privadas** (solo en memoria) y **bases confidenciales** (solo en conversaciones privadas).
 - Búsqueda local combinada por palabras (FTS5) y por significado (EmbeddingGemma en Ollama, ≈ 620 MB, se descarga desde la base de conocimiento).
 - El modo Chat usa Gemma 4 E4B por defecto si está instalado (medido: 12/12 aciertos y citas, igual que el 12B, en 20 s frente a 49 s).
+- **Vídeo de demostración** generado con la app real (`scripts/video`: guion, voz local con `say`, grabación controlada de la app y montaje con ffmpeg). Se genera en `video/ZHASKA-demo.mp4` (no se sube al repositorio).
 - `docs/PROPUESTA-IT.md`: propuesta para presentar a IT. Evaluación `tests/eval/assistant.eval.ts` y 11 pruebas nuevas; la prueba completa de la app pasa a 64 comprobaciones.
 
 ### Corregido
 - Los modelos que solo sirven para búsqueda (embeddings) ya no aparecen en el selector de modelos del chat.
+- En el modo Chat, un adjunto se quedaba en «Procesando…» aunque ya estuviera listo (no recibía el aviso de fin de la extracción). Detectado al grabar el vídeo de demostración.
 
 ### Mejorado — Modelos en tarjetas de 8 GB (24-11-2026, medido en el PC con Windows)
 - La barra lateral avisa cuando el modelo cargado no cabe entero en la tarjeta gráfica y parte va al procesador (más lento), y explica por qué y qué alternativa hay.
